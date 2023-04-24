@@ -66,7 +66,7 @@ class Population:
 
     def create_individuals(self, coordinates_dict, demands_dict):
         for i in range(self.supermarket_number):
-            ind = Individual.Individual(coordinates_dict[i], demands_dict[i])
+            ind = Individual.Individual(coordinates_dict[i], demands_dict[i], i+1)
             self.individuals.append(ind)
         return
 
@@ -76,6 +76,7 @@ class Population:
         print(f"the starting point coordinates are: {self.start_point.coordinates}")
         for i, individual in enumerate(self.individuals):
             print(f"the {i} individual coordinates are {individual.coordinates}, and the weight is {individual.demand}")
+        print("===================================================================================================")
         return
 
     def print_clusters(self):
@@ -89,6 +90,18 @@ class Population:
         clusters_centers, clusters = Clustering.clustering(self.individuals, self.trucks_number)
         for i in range(len(clusters)):
             self.clusters.append(Clustering.Cluster(clusters[i], clusters_centers[i]))
+
+        valid_clusters = [cluster.sum_demands > self.max_capacity for cluster in self.clusters]
+        if False in valid_clusters:
+            self.fix_cluster_weight()
+
+        return
+
+    def fix_cluster_weight(self):
+        for cluster in self.clusters:
+            if cluster.sum_demands > self.max_capacity:
+                self.balance_cluster_weight(cluster)
+
         return
 
 

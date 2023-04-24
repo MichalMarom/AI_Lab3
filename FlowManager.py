@@ -22,10 +22,11 @@ class FlowManager:
 
     def print_pop(self):
         self.population.print_pop()
+        self.population.print_clusters()
         return
 
     def solve_CVRP(self):
         self.population.create_clusters()
         # self.population.solve_clustrers_TSP()
-        self.population.print_clusters()
+
         return

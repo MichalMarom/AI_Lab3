@@ -1,0 +1,19 @@
+#%%
+# -----------Students ID -----------
+# ID_1: 305283111
+# ID_2: 207479940
+# ----------- File For Genetic Algorithm -----------
+import FlowManager
+# ----------- Python Package -----------
+
+def main():
+    flow_manager = FlowManager.FlowManager()
+    flow_manager.print_pop()
+    flow_manager.solve_CVRP()
+    return
+
+
+if __name__ == "__main__":
+    main()
+
+# %%

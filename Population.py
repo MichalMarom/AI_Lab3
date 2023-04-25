@@ -221,9 +221,3 @@ class Population:
         nearest_individual_index = dist.index(min(dist))
         return cluster.individuals[nearest_individual_index]
 
-
-
-
-
-
-

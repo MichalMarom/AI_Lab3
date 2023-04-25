@@ -21,8 +21,12 @@ class FlowManager:
         return
 
     def print_pop(self):
-        self.population.print_pop()
+        # self.population.print_pop()
         self.population.print_clusters()
+        return
+
+    def print_graph(self):
+        self.population.print_graph()
         return
 
     def solve_CVRP(self):

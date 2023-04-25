@@ -6,9 +6,6 @@ import threading
 # ----------- Consts Name  ----------
 NUM_ISLANDS = 2
 
-
-
-
 class FlowManager:
     population: Population
     results: list
@@ -32,5 +29,4 @@ class FlowManager:
     def solve_CVRP(self):
         self.population.create_clusters()
         # self.population.solve_clustrers_TSP()
-
         return

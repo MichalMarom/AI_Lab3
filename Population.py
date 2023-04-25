@@ -125,18 +125,22 @@ class Population:
 
     def create_clusters(self):
         # ------ Clustring with best fit - by weight ------
-        clusters = Clustering.best_fit(self.individuals, self.max_capacity)
-        for i in range(len(clusters)):
-            self.clusters.append(Clustering.Cluster(clusters[i]))
+        # clusters = Clustering.best_fit(self.individuals, self.max_capacity)
+        # for i in range(len(clusters)):
+        #     self.clusters.append(Clustering.Cluster(clusters[i]))
 
         # ------ Clustring KNN - by dist ------
-        # clusters_centers, clusters = Clustering.clustering(self.individuals, self.trucks_number)
-        # for i in range(len(clusters)):
-        #     self.clusters.append(Clustering.Cluster(clusters[i], clusters_centers[i]))
+        clusters_centers, clusters = Clustering.clustering(self.individuals, self.trucks_number)
+        for i in range(len(clusters)):
+            self.clusters.append(Clustering.Cluster(clusters[i], clusters_centers[i]))
 
-        clusters_valid_check = [cluster.sum_demands > self.max_capacity for cluster in self.clusters]
-        if False in clusters_valid_check:
-            self.fix_cluster_weight()
+        while True:
+            clusters_valid_check = [cluster.sum_demands > self.max_capacity for cluster in self.clusters]
+            print(clusters_valid_check)
+            if True not in clusters_valid_check:
+                break
+            elif True in clusters_valid_check:
+                self.fix_cluster_weight()
 
         return
 
@@ -145,8 +149,7 @@ class Population:
             print("AT INDEX:", index)
             if cluster.sum_demands > self.max_capacity:
                 self.balance_cluster_weight(cluster, index)
-
-        return
+        return  
 
     def balance_cluster_weight(self, cluster, cluster_index):
 

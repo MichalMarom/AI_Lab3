@@ -10,6 +10,7 @@ class Cluster:
     center: Individual
     sum_demands: int
     score: float
+    individuals: list
 
     def __init__(self, pop: list, center: Individual = None):
         self.individuals = pop

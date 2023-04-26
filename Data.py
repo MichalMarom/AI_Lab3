@@ -8,8 +8,7 @@
 # inputs_text_niche_algorithm = "Enter the niche algorithm:\n (Share Fitness = 0) \nClustering = 1 \nCrowding = 2\n"
 # inputs_text_age_factor = "Enter the age factor:\n"
 # inputs_text_viability_fuc_num = "Enter the viability func num:\nNone = 0\nf1 = 1\nf2 = 2\n"
-# inputs_text_algorithm = "Enter the algorithm:\nTabu search = 0\nACO = 1\nSimulated Annealing = 2\nGA = 3\nCooperative PSO = 4\n"
-
+inputs_text_algorithm = "Enter the algorithm:\nTabu search = 0\nACO = 1\nSimulated Annealing = 2\nGA = 3\nCooperative PSO = 4\n"
 
 class Data:
 
@@ -33,7 +32,7 @@ class Data:
         # self.niche_algorithm = int(input(inputs_text_niche_algorithm))
         # self.age_factor = float(input(inputs_text_age_factor))
         # self.viability_fuc_num = int(input(inputs_text_viability_fuc_num))
-        # self.algorithm = inputs_text_algorithm
+        self.algorithm = inputs_text_algorithm
         return
 
     def init_with_settings(self, setting_vector):

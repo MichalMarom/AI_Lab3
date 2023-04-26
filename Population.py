@@ -1,15 +1,19 @@
 # ----------- File Form Lab -----------
-import random
 import Data
 import Individual
 import Clustering
+import TabuSearch
 # ----------- Python Package -----------
-import numpy as np
+import random
 import math
 import matplotlib.pyplot as plt
 # ----------- Consts Parameters -----------
 # ----------- Consts Name  -----------
-
+Tabu_search = 0
+ACO = 1
+Simulated_Annealing = 2
+GA = 3
+Cooperative_PSO = 4
 
 class Population:
     data: Data
@@ -20,12 +24,14 @@ class Population:
     trucks_number: int
     clusters: list
     total_score: float
+    solution: list
 
     def __init__(self, setting_vector = None):
         self.data = Data.Data(setting_vector)
         self.individuals = []
         self.start_point = None
         self.clusters = []
+        self.total_score = 0
         self.read_problem_file()
 
     def read_problem_file(self):
@@ -63,22 +69,15 @@ class Population:
             # Initialize each supermarket by coordinates and demands
             self.create_individuals(coordinates_dict, demands_dict)
 
-            f.readline()
-            # Initialize start point
-            fields = f.readline().split("\n")
-            fields = fields[0].split(" ")
-            x_start = int(fields[1])
-
-            fields = f.readline().split("\n")
-            fields = fields[0].split(" ")
-            y_start = int(fields[1])
-            self.start_point = [x_start, y_start]
             return
 
     def create_individuals(self, coordinates_dict, demands_dict):
         for i in range(self.supermarket_number):
-            ind = Individual.Individual(coordinates_dict[i], demands_dict[i], i+1)
-            self.individuals.append(ind)
+            if i == 0:
+                self.start_point = Individual.Individual(coordinates_dict[i], demands_dict[i], i)
+            else:
+                ind = Individual.Individual(coordinates_dict[i], demands_dict[i], i)
+                self.individuals.append(ind)
         return
 
     def print_pop(self):
@@ -102,8 +101,8 @@ class Population:
         y1 = []
         colors = []
         ax = plt.axes()
-        ax.set(xlim=(100, 300),
-               ylim=(100, 300),
+        ax.set(xlim=(0, 1000),
+               ylim=(0, 1000),
                xlabel='X',
                ylabel='Y')
 
@@ -111,13 +110,30 @@ class Population:
             rand_colors = "#" + ''.join([random.choice('ABCDEF0123456789') for i in range(6)])
             colors.append(rand_colors)
 
-        for i, cluster in enumerate(self.clusters):
-            for individual in cluster.individuals:
-                x1.append(individual.coordinates[0])
-                y1.append(individual.coordinates[1])
-                ax.annotate(individual.index, (individual.coordinates[0], individual.coordinates[1]))
+        # ----- Print Clusters -----
+        # for i, cluster in enumerate(self.clusters):
+        #     for individual in cluster.individuals:
+        #         x1.append(individual.coordinates[0])
+        #         y1.append(individual.coordinates[1])
+        #         ax.annotate(individual.index, (individual.coordinates[0], individual.coordinates[1]))
+        #     plt.plot(x1, y1, color=colors[i],  marker='o')
+        #     plt.plot(cluster.center.coordinates[0], cluster.center.coordinates[1], color='red', marker='o')
+        #     x1 = []
+        #     y1 = []
+
+        x1.append(self.start_point.coordinates[0])
+        y1.append(self.start_point.coordinates[1])
+        ax.annotate(0, (self.start_point.coordinates[0], self.start_point.coordinates[1]))
+        plt.plot(x1, y1, color='red',  marker='o')
+        x1 = []
+        y1 = []
+
+        for i, path in enumerate(self.solution):
+            for point in path:
+                x1.append(point.coordinates[0])
+                y1.append(point.coordinates[1])
+                ax.annotate(point.index, (point.coordinates[0], point.coordinates[1]))
             plt.plot(x1, y1, color=colors[i],  marker='o')
-            plt.plot(cluster.center.coordinates[0], cluster.center.coordinates[1], color='red', marker='o')
             x1 = []
             y1 = []
         plt.show()
@@ -125,18 +141,22 @@ class Population:
 
     def create_clusters(self):
         # ------ Clustring with best fit - by weight ------
-        clusters = Clustering.best_fit(self.individuals, self.max_capacity)
-        for i in range(len(clusters)):
-            self.clusters.append(Clustering.Cluster(clusters[i]))
+        # clusters = Clustering.best_fit(self.individuals, self.max_capacity)
+        # for i in range(len(clusters)):
+        #     self.clusters.append(Clustering.Cluster(clusters[i]))
 
         # ------ Clustring KNN - by dist ------
-        # clusters_centers, clusters = Clustering.clustering(self.individuals, self.trucks_number)
-        # for i in range(len(clusters)):
-        #     self.clusters.append(Clustering.Cluster(clusters[i], clusters_centers[i]))
+        clusters_centers, clusters = Clustering.clustering(self.individuals, self.trucks_number)
+        for i in range(len(clusters)):
+            self.clusters.append(Clustering.Cluster(clusters[i], clusters_centers[i]))
 
-        clusters_valid_check = [cluster.sum_demands > self.max_capacity for cluster in self.clusters]
-        if False in clusters_valid_check:
-            self.fix_cluster_weight()
+        while True:
+            clusters_valid_check = [cluster.sum_demands > self.max_capacity for cluster in self.clusters]
+            print(clusters_valid_check)
+            if True not in clusters_valid_check:
+                break
+            elif True in clusters_valid_check:
+                self.fix_cluster_weight()
 
         return
 
@@ -176,34 +196,33 @@ class Population:
 
         # ------ balance with: Dist + weight, with circles ------
         # dist = [math.dist(cluster.center.coordinates, self.clusters[i].center.coordinates) for i in range(len(self.clusters))]
-        # weight = [self.clusters[i].sum_demands for i in range(len(self.clusters))]
+        weight = [self.clusters[i].sum_demands for i in range(len(self.clusters))]
         # clusters_score = [dist[i] + weight[i] for i in range(len(self.clusters))]
-        # print(len(clusters_score))
-        # min_centers = []
-        # for i in range(len(clusters_score)):
-        #     if clusters_score[i] == min(clusters_score):
-        #         min_centers.append(self.clusters[i])
-        # closest_cluster = random.sample(min_centers, 1)[0]
+        min_centers = []
+        for i in range(len(weight)):
+            if weight[i] == min(weight):
+                min_centers.append(self.clusters[i])
+        closest_cluster = random.sample(min_centers, 1)[0]
         # ------ balance with: Dist only ------
         # For the last cluster lets choose according to weight or Dist
-        if cluster_index == len(self.clusters)-1:
-            dist = [math.dist(cluster.center.coordinates, self.clusters[i].center.coordinates) for i in range(len(self.clusters)-1)]
-            weight = [self.clusters[i].sum_demands for i in range(len(self.clusters) - 1)]
-            # print("len dist:", len(dist))
-            min_dist_centers = []
-            for i in range(len(dist)):
-                if dist[i] == min(dist):
-                    min_dist_centers.append(self.clusters[i])
-            closest_cluster = random.sample(min_dist_centers, 1)[0]
-
-        else:
-            dist = [math.dist(cluster.center.coordinates, self.clusters[i].center.coordinates) for i in range(cluster_index+1, len(self.clusters))]
-            # print("len dist:", len(dist))
-            min_dist_centers = []
-            for i in range(len(dist)):
-                if dist[i] == min(dist):
-                    min_dist_centers.append(self.clusters[i + cluster_index + 1])
-            closest_cluster = random.sample(min_dist_centers, 1)[0]
+        # if cluster_index == len(self.clusters)-1:
+        #     dist = [math.dist(cluster.center.coordinates, self.clusters[i].center.coordinates) for i in range(len(self.clusters)-1)]
+        #     weight = [self.clusters[i].sum_demands for i in range(len(self.clusters) - 1)]
+        #     # print("len dist:", len(dist))
+        #     min_dist_centers = []
+        #     for i in range(len(dist)):
+        #         if dist[i] == min(dist):
+        #             min_dist_centers.append(self.clusters[i])
+        #     closest_cluster = random.sample(min_dist_centers, 1)[0]
+        #
+        # else:
+        #     dist = [math.dist(cluster.center.coordinates, self.clusters[i].center.coordinates) for i in range(cluster_index+1, len(self.clusters))]
+        #     # print("len dist:", len(dist))
+        #     min_dist_centers = []
+        #     for i in range(len(dist)):
+        #         if dist[i] == min(dist):
+        #             min_dist_centers.append(self.clusters[i + cluster_index + 1])
+        #     closest_cluster = random.sample(min_dist_centers, 1)[0]
 
         while cluster.sum_demands > self.max_capacity:
             nearest_individual = self.find_nearest_individual(closest_cluster, cluster)
@@ -221,9 +240,23 @@ class Population:
         nearest_individual_index = dist.index(min(dist))
         return cluster.individuals[nearest_individual_index]
 
+    def solve_clustrers_TSP(self):
+        self.solution = []
+        #if self.data.algorithm == Tabu_search:
+        self.solution = TabuSearch.tabu_search(self.clusters, self.start_point)
+        for i, path in enumerate(self.solution):
+            dist = math.dist(self.start_point.coordinates, path[0].coordinates)
+            for j, point in enumerate(path):
+                if 0 < j < len(path)-1:
+                    dist += math.dist(path[j].coordinates, path[j+1].coordinates)
+            self.clusters[i].score = dist
+            self.total_score += dist
 
-
-
+        for path in self.solution:
+            print("----------------")
+            for point in path:
+                print(point.index)
+        print("TOTAL SCORE: ", self.total_score)
 
 
 

@@ -69,22 +69,15 @@ class Population:
             # Initialize each supermarket by coordinates and demands
             self.create_individuals(coordinates_dict, demands_dict)
 
-            f.readline()
-            # Initialize start point
-            fields = f.readline().split("\n")
-            fields = fields[0].split(" ")
-            x_start = int(fields[1])
-
-            fields = f.readline().split("\n")
-            fields = fields[0].split(" ")
-            y_start = int(fields[1])
-            self.start_point = [x_start, y_start]
             return
 
     def create_individuals(self, coordinates_dict, demands_dict):
         for i in range(self.supermarket_number):
-            ind = Individual.Individual(coordinates_dict[i], demands_dict[i], i+1)
-            self.individuals.append(ind)
+            if i == 0:
+                self.start_point = Individual.Individual(coordinates_dict[i], demands_dict[i], i)
+            else:
+                ind = Individual.Individual(coordinates_dict[i], demands_dict[i], i)
+                self.individuals.append(ind)
         return
 
     def print_pop(self):

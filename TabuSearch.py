@@ -3,49 +3,62 @@ import math
 import random
 import numpy as np
 
-distance_matrix = np.array([[0, 2, 9, 10],
-                            [1, 0, 6, 4],
-                            [15, 7, 0, 8],
-                            [6, 3, 12, 0]])
 
-def tabu_search_path(clusters):
+def tabu_search(clusters, start_point):
     solution = []
-    for cluster in clusters:
-        distance_matrix = init_distance_matrix(cluster)
-        solution.append(tabu_search(cluster, tabu_list_size=len(cluster), max_iterations=10, distance_matrix))
+    for i in range(len(clusters)):
+        solution.append([])
+    for i, cluster in enumerate(clusters):
+        # Find the node that closest to the start point
+        dist = [math.dist(start_point.coordinates, ind.coordinates)  for ind in cluster.individuals]
+        start_node_index = dist.index(min(dist))
+        solution[i].append(cluster.individuals[start_node_index])
 
-def init_distance_matrix(cluster):
-    distance_matrix = np.zeros([len(cluster), len(cluster)])
-    for i in range(len(cluster)):
-        for j in range(len(cluster)):
-            distance_matrix[i][j] = math.dist(cluster[i].coordinates, cluster[j].coordinates)
-
-    return distance_matrix
+        while len(solution[i]) < len(cluster.individuals):
+            current_node = solution[len(solution)-1]
+            next_node = Local_search(cluster.individuals, current_node, solution[i], tabu_list_size=10, max_iterations=10)
+            solution[i].append(next_node)
 
 # Define the objective function to be minimized (total distance)
 def objective_function(solution: list):
     total_distance = 0
     for i in range(len(solution) - 1):
-        total_distance +=  math.dist(solution[i].coordinates, solution[i+1].coordinates)
+        total_distance += math.dist(solution[i].coordinates, solution[i+1].coordinates)
     total_distance += math.dist(solution[len(solution) - 1].coordinates, solution[0].coordinates)
     return total_distance
 
-# Define the neighborhood function (swap two cities)
-def neighborhood(solution):
-    new_solution = solution.copy()
-    i, j = random.sample(range(len(solution)), 2)
-    new_solution[i], new_solution[j] = new_solution[j], new_solution[i]
-    return new_solution
+# # Define the neighborhood function (swap two cities)
+# def neighborhood(solution):
+#     new_solution = solution.copy()
+#     i, j = random.sample(range(len(solution)), 2)
+#     new_solution[i], new_solution[j] = new_solution[j], new_solution[i]
+#     return new_solution
+
+
+def valid_nodes(individuals, tabu_list):
+    valid_nodes_list = []
+    tabu_list_coord = [ind.coordinates for ind in tabu_list]
+    for i, ind in enumerate(individuals):
+        if ind.coordinates not in tabu_list_coord:
+            valid_nodes_list.append(individuals[i])
+    return valid_nodes_list
+
+
+def select_next_node(current_node, individuals):
+    dist = [math.dist(current_node.coordinates, ind.coordinates)  for ind in individuals]
+    next_node_index = dist.index(min(dist))
+    return individuals[next_node_index]
+
 
 # Define the tabu search function
-def tabu_search(cluster, tabu_list_size, max_iterations, distance_matrix):
+def Local_search(individuals, current_node, path_solution, tabu_list_size=10, max_iterations=10):
 
     # Initialize the tabu list with empty solutions
-    tabu_list = [[] for i in range(tabu_list_size)]
+    tabu_list = []
 
     # Initialize the best solution and its objective function value
-    best_solution = cluster.individuals
-    best_value = objective_function(best_solution, distance_matrix)
+    best_solution = None
+    best_value = float('inf')
 
     # Initialize the current solution and its objective function value
     current_solution = best_solution
@@ -53,6 +66,7 @@ def tabu_search(cluster, tabu_list_size, max_iterations, distance_matrix):
 
     # Iterate for a maximum number of iterations
     for i in range(max_iterations):
+
         # Generate a new solution in the neighborhood of the current solution
         new_solution = neighborhood(current_solution)
 
@@ -81,7 +95,6 @@ def tabu_search(cluster, tabu_list_size, max_iterations, distance_matrix):
                 current_value = new_value
             else:
                 # Add the current solution to the tabu list
-                tabu_list.pop(0)
                 tabu_list.append(current_solution)
 
                 # Generate a new solution in the neighborhood of the current solution

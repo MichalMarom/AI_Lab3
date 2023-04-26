@@ -133,6 +133,8 @@ class Population:
         clusters_centers, clusters = Clustering.clustering(self.individuals, self.trucks_number)
         for i in range(len(clusters)):
             self.clusters.append(Clustering.Cluster(clusters[i], clusters_centers[i]))
+        
+        self.print_clusters()
 
         while True:
             clusters_valid_check = [cluster.sum_demands > self.max_capacity for cluster in self.clusters]

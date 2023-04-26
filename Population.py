@@ -31,6 +31,7 @@ class Population:
         self.individuals = []
         self.start_point = None
         self.clusters = []
+        self.total_score = 0
         self.read_problem_file()
 
     def read_problem_file(self):
@@ -109,13 +110,30 @@ class Population:
             rand_colors = "#" + ''.join([random.choice('ABCDEF0123456789') for i in range(6)])
             colors.append(rand_colors)
 
-        for i, cluster in enumerate(self.clusters):
-            for individual in cluster.individuals:
-                x1.append(individual.coordinates[0])
-                y1.append(individual.coordinates[1])
-                ax.annotate(individual.index, (individual.coordinates[0], individual.coordinates[1]))
+        # ----- Print Clusters -----
+        # for i, cluster in enumerate(self.clusters):
+        #     for individual in cluster.individuals:
+        #         x1.append(individual.coordinates[0])
+        #         y1.append(individual.coordinates[1])
+        #         ax.annotate(individual.index, (individual.coordinates[0], individual.coordinates[1]))
+        #     plt.plot(x1, y1, color=colors[i],  marker='o')
+        #     plt.plot(cluster.center.coordinates[0], cluster.center.coordinates[1], color='red', marker='o')
+        #     x1 = []
+        #     y1 = []
+
+        x1.append(self.start_point.coordinates[0])
+        y1.append(self.start_point.coordinates[1])
+        ax.annotate(0, (self.start_point.coordinates[0], self.start_point.coordinates[1]))
+        plt.plot(x1, y1, color='red',  marker='o')
+        x1 = []
+        y1 = []
+
+        for i, path in enumerate(self.solution):
+            for point in path:
+                x1.append(point.coordinates[0])
+                y1.append(point.coordinates[1])
+                ax.annotate(point.index, (point.coordinates[0], point.coordinates[1]))
             plt.plot(x1, y1, color=colors[i],  marker='o')
-            plt.plot(cluster.center.coordinates[0], cluster.center.coordinates[1], color='red', marker='o')
             x1 = []
             y1 = []
         plt.show()
@@ -226,9 +244,19 @@ class Population:
         self.solution = []
         #if self.data.algorithm == Tabu_search:
         self.solution = TabuSearch.tabu_search(self.clusters, self.start_point)
+        for i, path in enumerate(self.solution):
+            dist = math.dist(self.start_point.coordinates, path[0].coordinates)
+            for j, point in enumerate(path):
+                if 0 < j < len(path)-1:
+                    dist += math.dist(path[j].coordinates, path[j+1].coordinates)
+            self.clusters[i].score = dist
+            self.total_score += dist
 
         for path in self.solution:
             print("----------------")
             for point in path:
                 print(point.index)
+        print("TOTAL SCORE: ", self.total_score)
+
+
 

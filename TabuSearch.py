@@ -14,16 +14,23 @@ def tabu_search(clusters, start_point):
         start_node_index = dist.index(min(dist))
         solution[i].append(cluster.individuals[start_node_index])
 
-        while len(solution[i]) < len(cluster.individuals):
-            current_node = solution[len(solution)-1]
-            next_node = Local_search(cluster.individuals, current_node, solution[i], tabu_list_size=3, tabu_time=2, max_iterations=10)
+        individuals = cluster.individuals.copy()
+        individuals.remove(cluster.individuals[start_node_index])
+
+        while len(solution[i]) < len(cluster.individuals)-1:
+            diff = len(cluster.individuals) - len(solution[i]) - 1
+            current_node = solution[i][len(solution[i])-1]
+            next_node = Local_search(individuals, current_node, solution[i], tabu_list_size=diff, tabu_time=2, max_iterations=10)
             solution[i].append(next_node)
+            individuals.remove(next_node)
+        solution[i].append(individuals[0])
+
     return solution
 
 # Define the tabu search function
 def Local_search(individuals, current_node, path_solution, tabu_list_size, tabu_time, max_iterations):
     # Initialize the tabu list with empty solutions
-    tabu_list = [(current_node, 0)]
+    tabu_list = [current_node]
 
     # Initialize the best solution and its objective function value
     best_solution = None
@@ -38,9 +45,9 @@ def Local_search(individuals, current_node, path_solution, tabu_list_size, tabu_
         legal_nodes = valid_nodes(individuals, tabu_list)
         next_node = select_next_node(current_node, legal_nodes)
         solution_next_node_value = objective_function(path_solution, next_node)
-        add_node_tabu_list(tabu_list, tabu_time, tabu_list_size, next_node, i)
+        tabu_list = add_node_tabu_list(tabu_list, tabu_list_size, next_node)
 
-        if solution_next_node_value > best_value:
+        if solution_next_node_value < best_value:
             best_solution = next_node
             best_value = solution_next_node_value
 
@@ -94,12 +101,12 @@ def Local_search(individuals, current_node, path_solution, tabu_list_size, tabu_
 # Returns the valid nodes for selection that are not in the tabu list
 def valid_nodes(individuals, tabu_list):
     valid_nodes_list = []
-    tabu_list_coord = [ind[0].coordinates for ind in tabu_list]
+    tabu_list_coord = [ind.coordinates for ind in tabu_list]
     for i, ind in enumerate(individuals):
         if ind.coordinates not in tabu_list_coord:
             valid_nodes_list.append(individuals[i])
-    return valid_nodes_list
 
+    return valid_nodes_list
 
 
 # Selects the next closest node to the current node
@@ -110,13 +117,10 @@ def select_next_node(current_node, individuals):
 
 
 # Adding a node to the tabu list and updating the nodes in it
-def add_node_tabu_list(tabu_list, tabu_time, tabu_list_size, new_node, current_iteration):
+def add_node_tabu_list(tabu_list, tabu_list_size, new_node):
     if len(tabu_list) == tabu_list_size:
-        temp_tabu_list = tabu_list.copy()
-        for node in temp_tabu_list:
-            if current_iteration - node[1] > tabu_time:
-                tabu_list.remove(node)
-    tabu_list.append((new_node, current_iteration))
+        tabu_list.remove(tabu_list[0])
+    tabu_list.append(new_node)
     return tabu_list
 
 

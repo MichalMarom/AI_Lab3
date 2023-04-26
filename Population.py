@@ -1,11 +1,10 @@
 # ----------- File Form Lab -----------
-import random
 import Data
 import Individual
 import Clustering
 import TabuSearch
 # ----------- Python Package -----------
-import numpy as np
+import random
 import math
 import matplotlib.pyplot as plt
 # ----------- Consts Parameters -----------
@@ -224,5 +223,12 @@ class Population:
         return cluster.individuals[nearest_individual_index]
 
     def solve_clustrers_TSP(self):
-        # if self.data.algorithm == Tabu_search:
-        return
+        self.solution = []
+        #if self.data.algorithm == Tabu_search:
+        self.solution = TabuSearch.tabu_search(self.clusters, self.start_point)
+
+        for path in self.solution:
+            print("----------------")
+            for point in path:
+                print(point.index)
+

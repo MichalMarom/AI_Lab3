@@ -2,6 +2,7 @@
 import Data
 import Individual
 import Clustering
+import SimulatedAnnealing
 import TabuSearch
 # ----------- Python Package -----------
 import random
@@ -242,7 +243,7 @@ class Population:
         nearest_individual_index = dist.index(min(dist))
         return cluster.individuals[nearest_individual_index]
 
-    def solve_clustrers_TSP(self):
+    def solve_with_tabu_search(self):
         self.solution = []
         #if self.data.algorithm == Tabu_search:
         self.solution = TabuSearch.tabu_search(self.clusters, self.start_point)
@@ -259,6 +260,37 @@ class Population:
             for point in path:
                 print(point.index)
         print("TOTAL SCORE: ", self.total_score)
+        return
+
+    def solve_with_simulated_anealing(self):
+        self.solution = []
+        
+        # n = 10  
+        # points = [(random.uniform(-1, 1), random.uniform(-1, 1)) for i in range(n)]
+
+        initial_temp = 100.0
+        cooling_rate = 0.99
+
+        # Solve the problem using simulated annealing algorithm
+        best_tour, best_cost = SimulatedAnnealing.simulated_annealing(self.clusters[0], 
+                                                                      initial_temp, 
+                                                                      cooling_rate)
+        
+        # Print the results
+        print("Best tour:", best_tour)
+        print("Best cost:", best_cost)
 
 
 
+
+        # for path in self.solution:
+        #     print("----------------")
+        #     for point in path:
+        #         print(point.index)
+        # print("TOTAL SCORE: ", self.total_score)
+        return
+
+    def solve_clustrers_TSP(self):
+        # self.solve_with_tabu_search()
+        self.solve_with_simulated_anealing()
+        return

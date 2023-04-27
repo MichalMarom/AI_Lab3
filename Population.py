@@ -101,8 +101,8 @@ class Population:
         y1 = []
         colors = []
         ax = plt.axes()
-        ax.set(xlim=(0, 1000),
-               ylim=(0, 1000),
+        ax.set(xlim=(100, 300),
+               ylim=(100, 300),
                xlabel='X',
                ylabel='Y')
 

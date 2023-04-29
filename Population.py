@@ -265,8 +265,6 @@ class Population:
     def solve_with_simulated_anealing(self):
         self.solution = []
         
-        # n = 10  
-        # points = [(random.uniform(-1, 1), random.uniform(-1, 1)) for i in range(n)]
 
         initial_temp = 100.0
         cooling_rate = 0.99

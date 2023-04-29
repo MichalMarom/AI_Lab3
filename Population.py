@@ -18,21 +18,27 @@ Cooperative_PSO = 4
 
 class Population:
     data: Data
-    individuals: list
-    start_point: Individual
     max_capacity: int
     supermarket_number: int
     trucks_number: int
+
+    individuals: list
+    start_point: Individual
+    end_point: Individual
+
     clusters: list
+
     total_score: float
     solution: list
 
     def __init__(self, setting_vector = None):
         self.data = Data.Data(setting_vector)
         self.individuals = []
-        self.start_point = None
+        self.start_point = Individual.Individual([0,0], 0, 0)
+        self.end_point = Individual.Individual([0,0], 0, len(self.individuals))
         self.clusters = []
         self.total_score = 0
+        self.solution = []
         self.read_problem_file()
 
     def read_problem_file(self):
@@ -98,12 +104,14 @@ class Population:
         return
 
     def print_graph(self):
+        max_value_x = 200
+        max_value_y = 300
         x1 = []
         y1 = []
         colors = []
         ax = plt.axes()
-        ax.set(xlim=(100, 300),
-               ylim=(100, 300),
+        ax.set(xlim=(0, max_value_x),
+               ylim=(0, max_value_y),
                xlabel='X',
                ylabel='Y')
 
@@ -131,6 +139,7 @@ class Population:
 
         for i, path in enumerate(self.solution):
             for point in path:
+                print(f"the type of point is ->{type(point)}")
                 x1.append(point.coordinates[0])
                 y1.append(point.coordinates[1])
                 ax.annotate(point.index, (point.coordinates[0], point.coordinates[1]))
@@ -244,7 +253,7 @@ class Population:
         return cluster.individuals[nearest_individual_index]
 
     def solve_with_tabu_search(self):
-        self.solution = []
+        # self.solution = []
         #if self.data.algorithm == Tabu_search:
         self.solution = TabuSearch.tabu_search(self.clusters, self.start_point)
         for i, path in enumerate(self.solution):
@@ -263,29 +272,16 @@ class Population:
         return
 
     def solve_with_simulated_anealing(self):
-        self.solution = []
+     
+        for cluster in self.clusters:
+            simulated_annealing_instance = SimulatedAnnealing.SimulatedAnnealing(cluster)
+            simulated_annealing_instance.simulated_annealing()
+            solution, score = simulated_annealing_instance.get_solution_and_socre()
+            self.solution.append(solution)
+            self.total_score += score
         
-
-        initial_temp = 100.0
-        cooling_rate = 0.99
-
-        # Solve the problem using simulated annealing algorithm
-        best_tour, best_cost = SimulatedAnnealing.simulated_annealing(self.clusters[0], 
-                                                                      initial_temp, 
-                                                                      cooling_rate)
+        print("TOTAL SCORE: ", int(self.total_score))
         
-        # Print the results
-        print("Best tour:", best_tour)
-        print("Best cost:", best_cost)
-
-
-
-
-        # for path in self.solution:
-        #     print("----------------")
-        #     for point in path:
-        #         print(point.index)
-        # print("TOTAL SCORE: ", self.total_score)
         return
 
     def solve_clustrers_TSP(self):

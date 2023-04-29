@@ -9,3 +9,4 @@ class Individual:
         self.coordinates = cord
         self.demand = demand
         self.index = index
+        

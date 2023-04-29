@@ -19,7 +19,7 @@ class FlowManager:
 
     def print_pop(self):
         # self.population.print_pop()
-        self.population.print_clusters()
+        # self.population.print_clusters()
         return
 
     def print_graph(self):

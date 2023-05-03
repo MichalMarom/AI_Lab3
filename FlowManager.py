@@ -7,8 +7,6 @@ import threading
 NUM_ISLANDS = 2
 
 
-
-
 class FlowManager:
     population: Population
     results: list

@@ -271,28 +271,22 @@ class Population:
     def solve_clustrers_TSP(self):
         self.solution = []
         # if self.data.algorithm == Tabu_search:
-        # self.solution = TabuSearch.tabu_search(self.clusters, self.start_point)
+        self.solution, self.total_score = TabuSearch.tabu_search(self.clusters, self.start_point)
         # for i, path in enumerate(self.solution):
-        #     # dist = math.dist(self.start_point.coordinates, path[0].coordinates)
         #     dist = 0
         #     for j in range(len(path) - 1):
-        #         # Dist from last point of the path to the departure point
         #         dist += math.dist(path[j].coordinates, path[j + 1].coordinates)
-        #         # if j == len(path) - 1:
-        #         #     dist += math.dist(self.start_point.coordinates, path[j].coordinates)
-        #         # else:
-        #         #     dist += math.dist(path[j].coordinates, path[j+1].coordinates)
         #     self.clusters[i].score = dist
         #     self.total_score += dist
 
         #if self.data.algorithm == ACO:
-        self.solution = aco.aco_algo(self.clusters, self.start_point)
-        for i, path in enumerate(self.solution):
-            dist = 0
-            for j in range(len(path) - 1):
-                dist += math.dist(path[j].coordinates, path[j + 1].coordinates)
-            self.clusters[i].score = dist
-            self.total_score += dist
+        # self.solution = aco.aco_algo(self.clusters, self.start_point)
+        # for i, path in enumerate(self.solution):
+        #     dist = 0
+        #     for j in range(len(path) - 1):
+        #         dist += math.dist(path[j].coordinates, path[j + 1].coordinates)
+        #     self.clusters[i].score = dist
+        #     self.total_score += dist
 
         for path in self.solution:
             print("----------------")

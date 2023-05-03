@@ -1,31 +1,105 @@
+# ----------- File Form Lab -----------
+import Individual
 # ----------- Python Package -----------
 import math
 import random
 
 
+
+
 def tabu_search(clusters, start_point):
+    end_point = Individual.Individual(start_point.coordinates, start_point.demand, start_point.index)
+
+    max_iterations = 20
     solution = []
+    best_solution = []
     for i in range(len(clusters)):
-        solution.append([start_point])
+        solution.append([])
+        best_solution.append([])
 
-    for i, cluster in enumerate(clusters):
-        # Find the node that closest to the start point
-        dist = [math.dist(start_point.coordinates, ind.coordinates) for ind in cluster.individuals]
-        start_node_index = dist.index(min(dist))
-        solution[i].append(cluster.individuals[start_node_index])
+    best_score = []
+    for i in range(len(clusters)):
+        best_score.append(float('inf'))
 
-        individuals = cluster.individuals.copy()
-        individuals.remove(cluster.individuals[start_node_index])
+    for iteration in range(max_iterations):
+        for i, cluster in enumerate(clusters):
+            # # Find the node that closest to the start point
+            # dist = [math.dist(start_point.coordinates, ind.coordinates) for ind in cluster.individuals]
+            # start_node_index = dist.index(min(dist))
+            # solution[i].append(cluster.individuals[start_node_index])
+            #
+            # individuals = cluster.individuals.copy()
+            # individuals.remove(cluster.individuals[start_node_index])
+            solution[i] = []
+            # Chose a random first node
+            first_node = random.sample(cluster.individuals, 1)[0]
+            # Add the first node to the solution path
+            solution[i].append(first_node)
+            # Remove the first node from the list of the optional nodes
+            individuals = cluster.individuals.copy()
+            individuals.remove(first_node)
+            # ADD the start node and  end node to the list of the optional nodes
+            individuals.append(start_point)
+            # individuals.append(end_point)
 
-        while len(solution[i]) < len(cluster.individuals)-1:
-            diff = len(cluster.individuals) - len(solution[i]) - 1
-            current_node = solution[i][len(solution[i])-1]
-            next_node = Local_search(individuals, current_node, solution[i], tabu_list_size=diff, tabu_time=2, max_iterations=10)
-            solution[i].append(next_node)
-            individuals.remove(next_node)
-        solution[i].append(individuals[0])
+            circle_path = find_circle_path(solution[i], cluster.individuals, individuals)
+            # solution_path = fix_circle_to_start(circle_path)
+            # solution[i] = solution_path
+            solution[i] = circle_path
 
-    return solution
+        for i, cluster in enumerate(clusters):
+            #solution[i].append(start_point)
+            score = calc_score(solution[i])
+            if score < best_score[i]:
+                best_score[i] = score
+                best_solution[i] = solution[i]
+
+    for i, solution in enumerate(best_solution):
+        solution = fix_circle_to_start(solution)
+        solution.append(start_point)
+        score = calc_score(solution)
+        best_score[i] = score
+        best_solution[i] = solution
+            # while len(solution[i]) < len(cluster.individuals):
+            #     diff = len(cluster.individuals) - len(solution[i]) - 1
+            #     current_node = solution[i][len(solution[i])-1]
+            #     next_node = Local_search(individuals, current_node, solution[i], tabu_list_size=diff, tabu_time=2, max_iterations=10)
+            #     solution[i].append(next_node)
+            #     individuals.remove(next_node)
+            # solution[i].append(individuals[0])
+
+    return best_solution, sum(best_score)
+
+
+def calc_score(solution):
+    total_score = 0
+    for j in range(len(solution) - 1):
+        # Dist from last point of the path to the departure point
+        total_score += math.dist(solution[j].coordinates, solution[j + 1].coordinates)
+
+
+    return total_score
+
+
+def find_circle_path(solution_path, individuals, update_individuals):
+
+    current_node = solution_path[0]
+    while len(solution_path) < len(individuals):
+        diff = len(individuals) - len(solution_path) - 1
+        next_node = Local_search(update_individuals, current_node, solution_path, tabu_list_size=diff, tabu_time=2, max_iterations=10)
+        solution_path.append(next_node)
+        update_individuals.remove(next_node)
+        current_node = next_node
+    solution_path.append(update_individuals[0])
+
+    return solution_path
+
+
+def fix_circle_to_start(circle_path):
+    nodes_index = [node.index for node in circle_path]
+    start_index = nodes_index.index(0)
+    path = circle_path[start_index:] + circle_path[:start_index]
+    return path
 
 
 def dist_from_start(start_point, individuals):
@@ -51,20 +125,13 @@ def Local_search(individuals, current_node, path_solution, tabu_list_size, tabu_
     # Iterate for a maximum number of iterations
     for i in range(max_iterations):
         neighborhood = valid_nodes(individuals, tabu_list)
-        # print(tabu_list)
         next_node = select_next_node(current_node, neighborhood)
+
         # If there is no node that can be progressed to because all the nodes in the tabu list
-        # if next_node is None:
-        #     # If we are at the starting point of the path -
-        #     # we will remove a node from the tabu list that has been sitting there the longest
-        #     if len(path_solution):
-        #         neighborhood.append(tabu_list[0][0])
-        #         tabu_list.remove(tabu_list[0])
-        #         next_node = select_next_node(current_node, neighborhood)
-        #     # If we are not at the starting point of the path -
-        #     # We will try to go back to the node we visit before in the path and mark the current node that stuck us
-        #     else:
-        #         return None
+        if next_node is None:
+            # Remove a node from the tabu list that has been sitting there the longest
+            next_node, tabu_list = oldest_node_in_tabu(tabu_list, current_node)
+
         solution_next_node_value = objective_function(path_solution, next_node)
         tabu_list = add_node_tabu_list(tabu_list, tabu_list_size, next_node, i)
 
@@ -119,13 +186,24 @@ def Local_search(individuals, current_node, path_solution, tabu_list_size, tabu_
     return best_solution
 
 
+def oldest_node_in_tabu(tabu_list, current_node):
+
+    if tabu_list[0][0] == current_node:
+        node = tabu_list[1][0]
+        tabu_list.remove(tabu_list[1])
+    else:
+        node = tabu_list[0][0]
+        tabu_list.remove(tabu_list[0])
+
+    return node, tabu_list
+
+
 # Returns the valid nodes for selection that are not in the tabu list
 def valid_nodes(individuals, tabu_list):
     valid_nodes_list = []
     tabu_list_coord = [ind[0].coordinates for ind in tabu_list]
-    # bad_nodes_coord = [ind[0].coordinates for ind in bad_nodes]
+
     for i, ind in enumerate(individuals):
-        # if ind.coordinates not in tabu_list_coord and ind.coordinates not in bad_nodes_coord:
         if ind.coordinates not in tabu_list_coord:
             valid_nodes_list.append(individuals[i])
 
@@ -169,7 +247,7 @@ def update_tabu_list(tabu_list, tabu_time, current_time):
 
     # removing individuals
     for i, ind in enumerate(tabu_list):
-        if current_time - ind[1] >= tabu_time:
+        if current_time - ind[1] >= 0:
             update_tabu.remove(tabu_list[i])
     return update_tabu
 

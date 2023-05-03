@@ -40,6 +40,7 @@ class Cluster:
         for i, individual in enumerate(self.individuals):
             print(f"the {i} individual coordinates is {individual.coordinates}, the weight is {individual.demand}, the index is {individual.index}")
         print(f"sum of demands is  {self.sum_demands}")
+        print(f"The CENTER:  {self.center.coordinates}")
 
     def removing_individual(self, individual):
         individuals_coord = [ind.coordinates for ind in self.individuals]

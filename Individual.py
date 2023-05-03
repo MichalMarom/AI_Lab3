@@ -8,5 +8,5 @@ class Individual:
     def __init__(self, cord: list, demand: float, index: int):
         self.coordinates = cord
         self.demand = demand
-        self.index = index
-        
+        self.index = int(index)
+

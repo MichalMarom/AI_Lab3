@@ -5,8 +5,11 @@ import time
 import threading
 # ----------- Consts Name  ----------
 NUM_ISLANDS = 2
-TABU_SEARCH = 1
-SIMULATED_ANNEALING = 2
+Tabu_search = 0
+ACO = 1
+Simulated_Annealing = 2
+GA = 3
+Cooperative_PSO = 4
 
 
 class FlowManager:
@@ -31,6 +34,6 @@ class FlowManager:
 
     def solve_CVRP(self):
         self.population.create_clusters()
-        self.population.solve_clustrers_TSP(SIMULATED_ANNEALING)
+        self.population.solve_clustrers_TSP(ACO)
 
         return

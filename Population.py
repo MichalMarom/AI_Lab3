@@ -19,10 +19,6 @@ Cooperative_PSO = 4
 MAX_TRY = 5
 
 
-TABU_SEARCH = 1
-SIMULATED_ANNEALING = 2
-
-
 
 class Population:
     data: Data
@@ -188,17 +184,13 @@ class Population:
 
             while trys < MAX_TRY:
                 clusters_valid_check = [cluster.sum_demands > self.max_capacity for cluster in self.clusters]
-                print(clusters_valid_check)
                 if True not in clusters_valid_check:
-                    print("break INER loop")
                     break
                 elif True in clusters_valid_check:
                     self.fix_cluster_weight()
                     trys += 1
             else:
-                print("continue")
                 continue
-            print("break OYTER loop")
             break
 
         return
@@ -313,10 +305,10 @@ class Population:
         return
 
     def solve_clustrers_TSP(self, algorithem_type):
-        if algorithem_type == TABU_SEARCH:
+        if algorithem_type == Tabu_search:
             self.solve_with_tabu_search()
 
-        elif algorithem_type == SIMULATED_ANNEALING:
+        elif algorithem_type == Simulated_Annealing:
             self.solve_with_simulated_anealing()
 
         elif algorithem_type == ACO:

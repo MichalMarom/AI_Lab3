@@ -151,7 +151,7 @@ def aco_algo(clusters, start_point):
         for i, matrix_edges in enumerate(matrix_clusters_edges):
             update_edges(matrix_edges, clusters[i].individuals)
 
-    return best_solution
+    return best_solution, 0
 
 
 def update_edges(matrix_edges, individuals):

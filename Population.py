@@ -2,6 +2,7 @@
 import Data
 import Individual
 import Clustering
+import SimulatedAnnealing
 import TabuSearch
 import aco
 # ----------- Python Package -----------
@@ -18,23 +19,34 @@ Cooperative_PSO = 4
 MAX_TRY = 5
 
 
+TABU_SEARCH = 1
+SIMULATED_ANNEALING = 2
+
+
+
 class Population:
     data: Data
-    individuals: list
-    start_point: Individual
     max_capacity: int
     supermarket_number: int
     trucks_number: int
+
+    individuals: list
+    start_point: Individual
+    end_point: Individual
+
     clusters: list
+
     total_score: float
     solution: list
 
     def __init__(self, setting_vector=None):
         self.data = Data.Data(setting_vector)
         self.individuals = []
-        self.start_point = None
+        # self.start_point = Individual.Individual([0,0], 0, 0)
+        # self.end_point = Individual.Individual([0,0], 0, len(self.individuals))
         self.clusters = []
         self.total_score = 0
+        self.solution = []
         self.read_problem_file()
 
     def read_problem_file(self):
@@ -71,6 +83,8 @@ class Population:
 
             # Initialize each supermarket by coordinates and demands
             self.create_individuals(coordinates_dict, demands_dict)
+            
+            self.end_point = Individual.Individual(self.start_point.coordinates, 0, len(self.individuals)+1)
 
             return
 
@@ -101,29 +115,28 @@ class Population:
         return
 
     def print_graph(self):
+        x_values = []
+        y_values = []
+        for point in self.individuals:
+            x_values.append(point.coordinates[0])
+            y_values.append(point.coordinates[1])
+        
+        max_value_x = max(x_values) + 10
+        max_value_y = max(y_values) + 10
+        min_value_x = min(x_values) - 10
+        min_value_y = min(y_values) - 10
         x1 = []
         y1 = []
         colors = []
         ax = plt.axes()
-        ax.set(xlim=(0, 1000),
-               ylim=(0, 1000),
+        ax.set(xlim=(min_value_x, max_value_x),
+               ylim=(min_value_y, max_value_y),
                xlabel='X',
                ylabel='Y')
 
         for j in range(len(self.clusters)):
             rand_colors = "#" + ''.join([random.choice('ABCDEF0123456789') for i in range(6)])
             colors.append(rand_colors)
-
-        # ----- Print Clusters -----
-        # for i, cluster in enumerate(self.clusters):
-        #     for individual in cluster.individuals:
-        #         x1.append(individual.coordinates[0])
-        #         y1.append(individual.coordinates[1])
-        #         ax.annotate(individual.index, (individual.coordinates[0], individual.coordinates[1]))
-        #     plt.plot(x1, y1, color=colors[i],  marker='o')
-        #     plt.plot(cluster.center.coordinates[0], cluster.center.coordinates[1], color='red', marker='o')
-        #     x1 = []
-        #     y1 = []
 
         x1.append(self.start_point.coordinates[0])
         y1.append(self.start_point.coordinates[1])
@@ -146,6 +159,9 @@ class Population:
     def create_clusters(self):
 
         # ------ Clustring with best fit - by weight ------
+        # clusters = Clustering.best_fit(self.individuals, self.max_capacity)
+        # for i in range(len(clusters)):
+        #     self.clusters.append(Clustering.Cluster(clusters[i]))
         # clusters = Clustering.best_fit(self.individuals, self.max_capacity)
         # for i in range(len(clusters)):
         #     self.clusters.append(Clustering.Cluster(clusters[i]))
@@ -189,11 +205,10 @@ class Population:
 
     def fix_cluster_weight(self):
         for index, cluster in enumerate(self.clusters):
-            print("AT INDEX:", index)
+            # print("AT INDEX:", index)
             if cluster.sum_demands > self.max_capacity:
                 self.balance_cluster_weight(cluster, index)
-
-        return
+        return  
 
     def balance_cluster_weight(self, cluster, cluster_index):
 
@@ -260,7 +275,7 @@ class Population:
             # Adding the nearest individual to the closest cluster and updating sum_demands
             closest_cluster.adding_individual(nearest_individual)
 
-        print("finish!")
+        # print("finish!")
         return
 
     def find_nearest_individual(self, closest_cluster, cluster):
@@ -268,33 +283,43 @@ class Population:
         nearest_individual_index = dist.index(min(dist))
         return cluster.individuals[nearest_individual_index]
 
-    def solve_clustrers_TSP(self):
-        self.solution = []
-        # if self.data.algorithm == Tabu_search:
-        self.solution, self.total_score = TabuSearch.tabu_search(self.clusters, self.start_point)
-        # for i, path in enumerate(self.solution):
-        #     dist = 0
-        #     for j in range(len(path) - 1):
-        #         dist += math.dist(path[j].coordinates, path[j + 1].coordinates)
-        #     self.clusters[i].score = dist
-        #     self.total_score += dist
-
-        #if self.data.algorithm == ACO:
-        # self.solution = aco.aco_algo(self.clusters, self.start_point)
-        # for i, path in enumerate(self.solution):
-        #     dist = 0
-        #     for j in range(len(path) - 1):
-        #         dist += math.dist(path[j].coordinates, path[j + 1].coordinates)
-        #     self.clusters[i].score = dist
-        #     self.total_score += dist
-
-        for path in self.solution:
-            print("----------------")
-            for point in path:
-                print(point.index)
+    def solve_with_aco(self):
+        self.solution, self.total_score = aco.aco_algo(self.clusters, self.start_point)
         print("TOTAL SCORE: ", self.total_score)
+        return
 
-        return self.solution, self.total_score
+    def solve_with_tabu_search(self):
+        self.solution, self.total_score = TabuSearch.tabu_search(self.clusters, self.start_point)
+        print("TOTAL SCORE: ", self.total_score)
+        return
 
+    def solve_with_simulated_anealing(self):
+     
+        for cluster in self.clusters:
+            simulated_annealing_instance = SimulatedAnnealing.SimulatedAnnealing(cluster, 
+                                                                                 self.start_point, 
+                                                                                 self.end_point)
+            simulated_annealing_instance.simulated_annealing()
+            solution, score = simulated_annealing_instance.get_solution_and_socre()
+            self.solution.append(solution)
+            self.total_score += score
+        
+        # for path in self.solution:
+        #     print("----------------")
+        #     for point in path:
+        #         print(point.index)
+        print("TOTAL SCORE: ", int(self.total_score))
+        
+        return
 
+    def solve_clustrers_TSP(self, algorithem_type):
+        if algorithem_type == TABU_SEARCH:
+            self.solve_with_tabu_search()
 
+        elif algorithem_type == SIMULATED_ANNEALING:
+            self.solve_with_simulated_anealing()
+
+        elif algorithem_type == ACO:
+            self.solve_with_aco()
+
+        return

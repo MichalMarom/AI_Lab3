@@ -10,16 +10,21 @@ class Cluster:
     center: Individual
     sum_demands: int
     score: float
-    individuals: list
+    start_point: Individual
+    end_point: Individual
 
-    def __init__(self, pop: list, center: Individual = None):
-        self.individuals = pop
+    def __init__(self, population: list, 
+                 center: Individual = None):
+
+        self.individuals = population
         if center == None:
             self.update_center()
         else:
             self.center = center
         self.sum_demands = self.calc_sum_demands()
         self.score = self.calc_score()
+
+
 
     def calc_sum_demands(self):
         sum_demands = sum([individual.demand for individual in self.individuals])

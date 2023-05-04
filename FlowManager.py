@@ -7,7 +7,7 @@ import threading
 NUM_ISLANDS = 2
 TABU_SEARCH = 1
 SIMULATED_ANNEALING = 2
-
+ISLANDS = 3
 
 class FlowManager:
     population: Population
@@ -31,6 +31,6 @@ class FlowManager:
 
     def solve_CVRP(self):
         self.population.create_clusters()
-        self.population.solve_clustrers_TSP(SIMULATED_ANNEALING)
-
+        self.population.solve_clustrers_TSP(ISLANDS)
+        
         return

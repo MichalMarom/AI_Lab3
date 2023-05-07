@@ -1,5 +1,5 @@
 # ----------- File For Genetic Algorithm -----------
-import Population
+import CVRP
 # ----------- Python Package -----------
 import time
 import threading
@@ -10,27 +10,27 @@ SIMULATED_ANNEALING = 2
 ISLANDS = 3
 
 class FlowManager:
-    population: Population
+    cvrp: CVRP
     results: list
 
     def __init__(self):
         self.total_time = time.time()
-        self.population = Population.Population()
+        self.cvrp = CVRP.CVRP()
         self.results = []
         self.islands = []
         return
 
     def print_pop(self):
-        self.population.print_pop()
-        self.population.print_clusters()
+        self.cvrp.print_pop()
+        self.cvrp.print_clusters()
         return
 
     def print_graph(self):
-        self.population.print_graph()
+        self.cvrp.print_graph()
         return
 
     def solve_CVRP(self):
-        self.population.create_clusters()
-        self.population.solve_clustrers_TSP(ISLANDS)
+        self.cvrp.create_clusters()
+        self.cvrp.solve_clustrers_TSP(ISLANDS)
         
         return

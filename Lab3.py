@@ -10,7 +10,7 @@ def main():
     flow_manager = FlowManager.FlowManager()
     flow_manager.solve_CVRP()
     # flow_manager.print_pop()
-    flow_manager.print_graph()
+    # flow_manager.print_graph()
     return
 
 

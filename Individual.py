@@ -1,3 +1,4 @@
+import math
 
 
 class Individual:
@@ -9,4 +10,7 @@ class Individual:
         self.coordinates = cord
         self.demand = demand
         self.index = int(index)
+
+    def distance_func(self, other_ind):
+        return math.dist(self.coordinates, other_ind.coordinates)
 

@@ -5,6 +5,7 @@ import Clustering
 import SimulatedAnnealing
 import TabuSearch
 import aco
+import CooperativePSO
 # ----------- Python Package -----------
 import random
 import math
@@ -17,7 +18,7 @@ Simulated_Annealing = 2
 GA = 3
 Cooperative_PSO = 4
 MAX_TRY = 5
-
+MAX_TRY_CLUSTER = 100
 
 
 class Population:
@@ -147,6 +148,7 @@ class Population:
                 y1.append(point.coordinates[1])
                 ax.annotate(point.index, (point.coordinates[0], point.coordinates[1]))
             plt.plot(x1, y1, color=colors[i],  marker='o')
+            # plt.plot([self.clusters[i].center.coordinates[0]], [self.clusters[i].center.coordinates[1]], color='red',marker='X')
             x1 = []
             y1 = []
         plt.show()
@@ -174,25 +176,36 @@ class Population:
         #         break
         #     elif True in clusters_valid_check:
         #         self.fix_cluster_weight()
+        silhouette_per_try = []
+        inertia_per_try = []
+        clusters_per_try = []
+        for i in range(MAX_TRY_CLUSTER):
+            while True:
+                trys = 0
+                self.clusters = []
+                clusters_centers, clusters = Clustering.clustering(self.individuals, self.trucks_number)
+                for i in range(len(clusters)):
+                    self.clusters.append(Clustering.Cluster(clusters[i], clusters_centers[i]))
 
-        while True:
-            trys = 0
-            self.clusters = []
-            clusters_centers, clusters = Clustering.clustering(self.individuals, self.trucks_number)
-            for i in range(len(clusters)):
-                self.clusters.append(Clustering.Cluster(clusters[i], clusters_centers[i]))
+                while trys < MAX_TRY:
+                    clusters_valid_check = [cluster.sum_demands > self.max_capacity for cluster in self.clusters]
+                    if True not in clusters_valid_check:
+                        break
+                    elif True in clusters_valid_check:
+                        self.fix_cluster_weight()
+                        trys += 1
+                else:
+                    continue
+                break
 
-            while trys < MAX_TRY:
-                clusters_valid_check = [cluster.sum_demands > self.max_capacity for cluster in self.clusters]
-                if True not in clusters_valid_check:
-                    break
-                elif True in clusters_valid_check:
-                    self.fix_cluster_weight()
-                    trys += 1
-            else:
-                continue
-            break
+            clusters_centers = [cluster.center for cluster in self.clusters]
+            silhouette_score = Clustering.silhouette(clusters_centers, self.clusters)
+            silhouette_per_try.append(silhouette_score)
+            inertia_score = Clustering. inertia(clusters_centers, self.clusters)
+            inertia_per_try.append(inertia_score)
+            clusters_per_try.append(self.clusters)
 
+        self.clusters = Clustering.find_best_cluster(clusters_per_try, silhouette_per_try)
         return
 
     def fix_cluster_weight(self):
@@ -275,9 +288,22 @@ class Population:
         nearest_individual_index = dist.index(min(dist))
         return cluster.individuals[nearest_individual_index]
 
-    def solve_with_aco(self):
-        self.solution, self.total_score = aco.aco_algo(self.clusters, self.start_point)
-        print("TOTAL SCORE: ", self.total_score)
+    def solve_clustrers_TSP(self, algorithem_type):
+        if algorithem_type == Tabu_search:
+            self.solve_with_tabu_search()
+
+        elif algorithem_type == ACO:
+            self.solve_with_aco()
+
+        elif algorithem_type == Simulated_Annealing:
+            self.solve_with_simulated_anealing()
+
+        #elif algorithem_type == GA:
+            # self.solve_with_Cooperative_PSO()
+
+        elif algorithem_type == Cooperative_PSO:
+            self.solve_with_Cooperative_PSO()
+
         return
 
     def solve_with_tabu_search(self):
@@ -285,33 +311,31 @@ class Population:
         print("TOTAL SCORE: ", self.total_score)
         return
 
+    def solve_with_aco(self):
+        self.solution, self.total_score = aco.aco_algo(self.clusters, self.start_point)
+        print("TOTAL SCORE: ", self.total_score)
+        return
+
     def solve_with_simulated_anealing(self):
-     
+
         for cluster in self.clusters:
-            simulated_annealing_instance = SimulatedAnnealing.SimulatedAnnealing(cluster, 
-                                                                                 self.start_point, 
+            simulated_annealing_instance = SimulatedAnnealing.SimulatedAnnealing(cluster,
+                                                                                 self.start_point,
                                                                                  self.end_point)
             simulated_annealing_instance.simulated_annealing()
             solution, score = simulated_annealing_instance.get_solution_and_socre()
             self.solution.append(solution)
             self.total_score += score
-        
+
         # for path in self.solution:
         #     print("----------------")
         #     for point in path:
         #         print(point.index)
         print("TOTAL SCORE: ", int(self.total_score))
-        
+
         return
 
-    def solve_clustrers_TSP(self, algorithem_type):
-        if algorithem_type == Tabu_search:
-            self.solve_with_tabu_search()
-
-        elif algorithem_type == Simulated_Annealing:
-            self.solve_with_simulated_anealing()
-
-        elif algorithem_type == ACO:
-            self.solve_with_aco()
-
+    def solve_with_Cooperative_PSO(self):
+        self.solution, self.total_score = CooperativePSO.cooperative_pso(self.clusters, self.start_point)
+        print("TOTAL SCORE: ", self.total_score)
         return

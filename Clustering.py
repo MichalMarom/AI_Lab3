@@ -176,3 +176,56 @@ def equal_centers(clusters_centers_previous: list, clusters_centers_update: list
     return True
 
 
+def silhouette(clusters_centers: list, clusters: list):
+    silhouette_score_cluster = []
+    silhouette_score_all_clusters = []
+
+    for index, cluster in enumerate(clusters):
+        for individual in cluster.individuals:
+            # Calculate the average distance between individual and all other points in cluster:
+            dist_list = [individual.distance_func(ind) for ind in cluster.individuals]
+            average_dist_in_cluster = sum(dist_list)/len(cluster.individuals)
+
+            # Calculate the average distance between individual and all points in the nearest neighboring cluster
+            nearest_cluster_index = find_nearest_cluster(individual, index, clusters_centers)
+            dist_list = [individual.distance_func(ind) for ind in clusters[nearest_cluster_index].individuals]
+            average_dist_all_clusters = sum(dist_list)/len(clusters[nearest_cluster_index].individuals)
+
+            # Calculate the silhouette score for individual
+            silhouette_for_individual = (average_dist_all_clusters - average_dist_in_cluster) / max(average_dist_all_clusters, average_dist_in_cluster)
+            silhouette_score_cluster.append(silhouette_for_individual)
+
+        # The silhouette score for a cluster
+        silhouette_for_cluster = sum(silhouette_score_cluster) / len(cluster.individuals)
+        silhouette_score_all_clusters.append(silhouette_for_cluster)
+
+    # The overall silhouette score for the clustering solution
+    silhouette_score = sum(silhouette_score_all_clusters) / len(clusters)
+    return silhouette_score
+
+
+def find_nearest_cluster(individual, cluster_index, clusters_centers: list):
+    dist_from_clusters = [individual.distance_func(center) for center in clusters_centers]
+    nearest_cluster_index = 0
+    nearest_cluster_dist = dist_from_clusters[0]
+    for index, dist in enumerate(dist_from_clusters):
+        if dist < nearest_cluster_dist and index != cluster_index:
+            nearest_cluster_index = index
+            nearest_cluster_dist = dist_from_clusters[index]
+
+    return nearest_cluster_index
+
+
+def inertia(clusters_centers, clusters):
+    dist_per_cluster = []
+    for index, cluster in enumerate(clusters):
+        dist_list = [ind.distance_func(clusters_centers[index]) for ind in cluster.individuals]
+        dist_per_cluster.append(sum(dist_list) / len(cluster.individuals))
+
+    average_dist_all_clusters = (sum(dist_per_cluster) / len(clusters))
+    return average_dist_all_clusters
+
+
+def find_best_cluster(clusters_per_try, silhouette_per_try):
+    best_clusters_index = silhouette_per_try.index(max(silhouette_per_try))
+    return clusters_per_try[best_clusters_index]

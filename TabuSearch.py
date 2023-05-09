@@ -17,7 +17,7 @@ class Edge:
 # ----------- Search path for each cluster -----------
 def tabu_search(clusters, start_point):
 
-    max_iterations = 20
+    max_iterations = 100
     solution = []
     solution_edges = []
     best_solution = []
@@ -180,6 +180,7 @@ def Local_search_edges(optional_edges, solution_edges, tabu_list_size, tabu_time
 
     # Return the best solution that found
     return best_solution
+
 
 # Returns the legal edges that are not in the tabu list
 def valid_edges(edges, tabu_list):

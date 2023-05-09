@@ -34,6 +34,6 @@ class FlowManager:
 
     def solve_CVRP(self):
         self.population.create_clusters()
-        self.population.solve_clustrers_TSP(ACO)
+        self.population.solve_clustrers_TSP(Cooperative_PSO)
 
         return

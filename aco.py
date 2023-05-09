@@ -6,9 +6,9 @@ import numpy as np
 
 # ----------- Consts Name  ----------
 PHEROMONE = 50  # Amount of pheromone an ant borne with
-ALPHA = 1  # The importance of the pheromone on the edge in the probabilistic transition
+ALPHA = 1   # The importance of the pheromone on the edge in the probabilistic transition
 BETA = 1  # The importance of the length of the edge in the probabilistic transition
-RHO = 0.2  # The trail persistence or evaporation rate
+RHO = 0.8  # The trail persistence or evaporation rate
 
 
 class Ant:
@@ -20,39 +20,33 @@ class Ant:
     path_edges: list
     score: float
 
-    def __init__(self, current_node, start_point, individuals, matrix_edges):
+    def __init__(self, current_node, individuals, matrix_edges):
         self.pheromone = PHEROMONE
         self.current_node = current_node
-        self.neighborhood = [ind for ind in individuals if ind.coordinates != current_node.coordinates]
-        self.edges_neighborhood = []
-        self.path_nodes = [start_point, current_node]
-
-        first_edge = Edge([start_point, current_node])
-        first_edge.tau += PHEROMONE / first_edge.length
-        self.path_edges = [first_edge]
-
+        self.neighborhood = [ind for ind in individuals if ind.index != current_node.index]
+        self.path_nodes = [current_node]
+        self.path_edges = []
         self.update_edges(matrix_edges)
         self.score = 0
 
     # Updating the list of neighbors according to the nodes the ant have already visited
     def update_neighborhood(self):
-        neighborhood_coord = [neighbor.coordinates for neighbor in self.neighborhood]
+        neighborhood_index = [neighbor.index for neighbor in self.neighborhood]
         for node in self.path_nodes:
-            if node.coordinates in neighborhood_coord:
+            if node.index in neighborhood_index:
                 self.neighborhood.remove(node)
 
     # Updating the list of edges according to the edges the ant have already visited
     def update_edges(self, matrix_edges):
         self.edges_neighborhood = []
         for neighbor in self.neighborhood:
-            self.edges_neighborhood.append(matrix_edges[self.current_node.index-1][neighbor.index-1])
+            if self.current_node.index != neighbor.index:
+                self.edges_neighborhood.append(matrix_edges[self.current_node.index][neighbor.index])
 
         edges_neighborhood_nodes = [edge.nodes for edge in self.edges_neighborhood]
         for edge in self.path_edges:
             if edge.nodes in edges_neighborhood_nodes:
                 self.edges_neighborhood.remove(edge)
-
-
         return
 
     def select_next_node(self):
@@ -79,13 +73,24 @@ class Ant:
 
         return
 
+    # Correcting the path so that it starts from point 0
+    def fix_path_to_start(self, start_point):
+        self.path_nodes.append(start_point)
+        self.path_nodes = [start_point] + self.path_nodes
+        first_edge = Edge([self.path_nodes[0], self.path_nodes[1]])
+        last_edge = Edge([self.path_nodes[len(self.path_nodes) - 2], self.path_nodes[len(self.path_nodes) - 1]])
+        self.path_edges.append(last_edge)
+        self.path_edges = [first_edge] + self.path_edges
+
+        return
+
     # Calculating and updating the length of the ant's path
     def update_score(self):
         dist = 0
-        self.path_nodes.append(self.path_nodes[0])
         for i in range(len(self.path_nodes) - 1):
             dist += math.dist(self.path_nodes[i].coordinates, self.path_nodes[i+1].coordinates)
         self.score = dist
+        return
 
 
 class Edge:
@@ -107,30 +112,40 @@ class Edge:
 # ----------- Search path for each cluster -----------
 def aco_algo(clusters, start_point):
 
-    max_iterations = 10
-    matrix_clusters_edges = [init_matrix_edges(cluster.individuals) for cluster in clusters]
+    max_iterations = 100
+    local_min = 0
+    old_best_cost = 0
+    num_ants = 5
+    global ALPHA
+    global BETA
+    global RHO
+    global PHEROMONE
 
     solution = []
     best_solution = []
+    best_score = []
+
     for i in range(len(clusters)):
         solution.append([])
         best_solution.append([])
-
-    best_score = []
-    for i in range(len(clusters)):
         best_score.append(float('inf'))
+
+    matrix_clusters_edges = [init_matrix_edges(cluster.individuals) for cluster in clusters]
 
     for iteration in range(max_iterations):
         for i, cluster in enumerate(clusters):
-            nodes = random.sample(cluster.individuals, len(cluster.individuals))
+            # nodes = random.sample(cluster.individuals, num_ants)
+            first_node = random.sample(cluster.individuals, 1)[0]
+
             # Saving the matrix of edges within the cluster
             matrix_edges = matrix_clusters_edges[i]
-            # Put the ants at a random nodes
-            ants = [Ant(node, start_point, cluster.individuals, matrix_edges) for node in nodes]
-            # The path start from node 0 and continues to the location of the ant
-            path_length = 2
 
-            while path_length < len(cluster.individuals)+1:
+            # Put the ants at the randoms nodes
+            ants = [Ant(first_node, cluster.individuals, matrix_edges) for i in range(num_ants)]
+
+            # The path start the location of the ant
+            path_length = 0
+            while path_length < len(cluster.individuals) - 1:
                 for ant in ants:
                     ant.update_neighborhood()
                     ant.update_edges(matrix_edges)
@@ -139,15 +154,27 @@ def aco_algo(clusters, start_point):
                 path_length += 1
 
             for ant in ants:
+                ant.fix_path_to_start(start_point)
                 ant.update_score()
+                # print(f"{[node.index for node in ant.path_nodes]} , {ant.score}")
 
             path, score = find_best_path(ants)
             if score < best_score[i]:
                 best_score[i] = score
                 best_solution[i] = path
 
+        new_best_cost = sum(best_score)
+        if old_best_cost == new_best_cost:
+            local_min += 1
+            if local_min == 4:
+                update_edges(matrix_edges, clusters[i].individuals, increasing_explortion=True)
+                local_min = 0
+                # num_ants += 2
+
+        old_best_cost = new_best_cost
+
         for i, matrix_edges in enumerate(matrix_clusters_edges):
-            update_edges(matrix_edges, clusters[i].individuals)
+            update_edges(matrix_edges, clusters[i].individuals,  increasing_explortion=False)
 
     return best_solution, sum(best_score)
 
@@ -155,7 +182,7 @@ def aco_algo(clusters, start_point):
 # Initialize the edges matrix for a cluster
 def init_matrix_edges(individuals):
     individuals_index = [ind.index for ind in individuals]
-    matrix_size = max(individuals_index)
+    matrix_size = max(individuals_index)+1
     matrix_edges = []
 
     # Create List of list
@@ -168,7 +195,7 @@ def init_matrix_edges(individuals):
         for j_ind in individuals:
             if i_ind.index != j_ind.index:
                 nodes = [i_ind, j_ind]
-                matrix_edges[i_ind.index - 1][j_ind.index - 1] = Edge(nodes)
+                matrix_edges[i_ind.index][j_ind.index] = Edge(nodes)
 
     return matrix_edges
 
@@ -181,13 +208,23 @@ def find_best_path(ants):
     return min_path, min(scores)
 
 
+def find_best_path(ants):
+    scores = [ant.score for ant in ants]
+    min_scores_index = scores.index(min(scores))
+    min_path = ants[min_scores_index].path_nodes
+    return min_path, min(scores)
+
+
 # Update the tau for each edge in the cluster
-def update_edges(matrix_edges, individuals):
+def update_edges(matrix_edges, individuals, increasing_explortion: bool):
     for i_ind in individuals:
         for j_ind in individuals:
             if i_ind.index != j_ind.index:
-                matrix_edges[i_ind.index-1][j_ind.index-1].update_tau()
-
+                # if increasing_explortion and matrix_edges[i_ind.index][j_ind.index].tau < 10:
+                #     matrix_edges[i_ind.index][j_ind.index].tau *= 10
+                if increasing_explortion:
+                    matrix_edges[i_ind.index][j_ind.index].tau = 0.1
+                else:
+                    matrix_edges[i_ind.index][j_ind.index].update_tau()
     return
-
 

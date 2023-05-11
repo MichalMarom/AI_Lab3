@@ -1,5 +1,6 @@
 # ----------- File For Genetic Algorithm -----------
 import Population
+import Ackley
 # ----------- Python Package -----------
 import time
 import threading
@@ -37,3 +38,7 @@ class FlowManager:
         self.population.solve_clustrers_TSP(Cooperative_PSO)
 
         return
+
+    def find_minimum_ackley(self):
+        ackley_function = Ackley()
+        ackley_function.find_minimum(Tabu_search)

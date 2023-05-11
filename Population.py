@@ -288,20 +288,20 @@ class Population:
         nearest_individual_index = dist.index(min(dist))
         return cluster.individuals[nearest_individual_index]
 
-    def solve_clustrers_TSP(self, algorithem_type):
-        if algorithem_type == Tabu_search:
+    def solve_clustrers_TSP(self, algorithm_type):
+        if algorithm_type == Tabu_search:
             self.solve_with_tabu_search()
 
-        elif algorithem_type == ACO:
+        elif algorithm_type == ACO:
             self.solve_with_aco()
 
-        elif algorithem_type == Simulated_Annealing:
+        elif algorithm_type == Simulated_Annealing:
             self.solve_with_simulated_anealing()
 
-        #elif algorithem_type == GA:
+        #elif algorithm_type == GA:
             # self.solve_with_Cooperative_PSO()
 
-        elif algorithem_type == Cooperative_PSO:
+        elif algorithm_type == Cooperative_PSO:
             self.solve_with_Cooperative_PSO()
 
         return
@@ -339,3 +339,5 @@ class Population:
         self.solution, self.total_score = CooperativePSO.cooperative_pso(self.clusters, self.start_point)
         print("TOTAL SCORE: ", self.total_score)
         return
+
+

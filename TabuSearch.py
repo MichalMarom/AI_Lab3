@@ -4,7 +4,7 @@ import Ackley
 # ----------- Python Package -----------
 import math
 import random
-
+import numpy as np
 
 
 class Edge:
@@ -272,49 +272,74 @@ def direction(p, q, r):
 
 
 # --------------------------------------------------------------------------------------------------------
-
-
 # ----------- Search Minimum for ackley function -----------
 def tabu_search_ackley(ackley: Ackley.AckleyFunction):
     max_iterations = 100
     tabu_list = []
     best_solution = None
     best_score = float('inf')
-    diff = max_iterations / 2
-    tabu_list_size = diff
-    tabu_time = 5
-    max_iterations = 100
-    radius = 5
+    tabu_list_size = math.sqrt(max_iterations)
+    tabu_time = 10
+    neighborhood_size = 100
 
     # Chose a random first node
-    first_node_coordinates = [random.sample(range(-32.768, 32.768), 1) for i in range(ackley.dimensions)]
-    first_node = Individual(first_node_coordinates)
+    first_node_coordinates = [random.uniform(-32.768, 32.768) for i in range(ackley.dimensions)]
+    first_node = Individual.Individual(first_node_coordinates)
     # Add the first node to the solution path
     tabu_list.append([first_node, 0])
     current_node = first_node
 
     for i in range(max_iterations):
-        neighborhood = find_neighborhood(current_node, tabu_list, ackley, radius)
-        next_node = select_next_node(neighborhood, current_node)
-        score = ackley.objective_function(next_node)
+        neighborhood = find_neighborhood(current_node, tabu_list, ackley, neighborhood_size)
+        next_node = select_next_node(neighborhood, ackley)
+        score = ackley.function(next_node)
         tabu_list = add_node_tabu_list(tabu_list, tabu_list_size, next_node, i)
+        current_node = next_node
+
         if score < best_score:
             best_score = score
             best_solution = next_node
+        elif 0 <= abs(score-best_score) <= 1:
+            # Chose a random first node
+            first_node_coordinates = [random.uniform(-32.768, 32.768) for i in range(ackley.dimensions)]
+            first_node = Individual.Individual(first_node_coordinates)
+            # Add the first node to the solution path
+            tabu_list.clear()
+            tabu_list.append([first_node, i])
+            current_node = first_node
 
         tabu_list = update_tabu_list_ackley(tabu_list, tabu_time, i)
 
     return best_solution, best_score
 
 
-def find_neighborhood(current_node, tabu_list, ackley, radius):
+def find_neighborhood(current_node, tabu_list, ackley, neighborhood_size):
+    neighborhood = []
+    tabu_list_coordinates = [item[0].coordinates for item in tabu_list]
+    sigma = 0.1
 
-    return
+    for i in range(neighborhood_size):
+        while True:
+            perturbation = np.random.normal(loc=0.0, scale=sigma, size=ackley.dimensions)
+            neighbor_coordinates = current_node.coordinates + perturbation
+            if not neighbor_in_tabu(neighbor_coordinates, tabu_list_coordinates):
+                neighborhood.append(Individual.Individual(neighbor_coordinates))
+                break
+
+    return neighborhood
 
 
-def select_next_node(neighborhood, current_node):
-    dist_list = [current_node.distance_func_ackley(neighbor) for neighbor in neighborhood]
-    min_neighbor_index = neighborhood.index(min(dist_list))
+def neighbor_in_tabu(neighbor_coordinates, tabu_list_coordinates):
+    for node in tabu_list_coordinates:
+        for i in range(len(node)):
+            if node[i] == neighbor_coordinates[i]:
+                return True
+    return False
+
+
+def select_next_node(neighborhood, ackley):
+    function_list = [ackley.function(neighbor) for neighbor in neighborhood]
+    min_neighbor_index = function_list.index(min(function_list))
     return neighborhood[min_neighbor_index]
 
 

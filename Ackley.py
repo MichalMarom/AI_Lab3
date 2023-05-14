@@ -55,12 +55,14 @@ class AckleyFunction:
 
     def solve_with_tabu_search(self):
         self.solution, self.score = TabuSearch.tabu_search_ackley(self)
+        print("solution: ", self.solution.coordinates)
         print("TOTAL SCORE: ", self.score)
         return
 
     def solve_with_aco(self):
-        self.solution, self.total_score = aco.aco_algo()
-        print("TOTAL SCORE: ", self.total_score)
+        self.solution, self.score = aco.aco_algo_ackley(self)
+        print("solution: ", self.solution.coordinates)
+        print("TOTAL SCORE: ", self.score)
         return
 
     def solve_with_simulated_anealing(self):

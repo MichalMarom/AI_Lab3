@@ -40,5 +40,5 @@ class FlowManager:
         return
 
     def find_minimum_ackley(self):
-        ackley_function = Ackley()
+        ackley_function = Ackley.AckleyFunction()
         ackley_function.find_minimum(Tabu_search)

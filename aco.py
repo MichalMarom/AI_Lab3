@@ -1,9 +1,10 @@
+# ----------- File Form Lab -----------
+import Individual
+import Ackley
 # ----------- Python Package -----------
 import math
 import random
-
 import numpy as np
-
 # ----------- Consts Name  ----------
 PHEROMONE = 50  # Amount of pheromone an ant borne with
 ALPHA = 1   # The importance of the pheromone on the edge in the probabilistic transition
@@ -169,7 +170,6 @@ def aco_algo(clusters, start_point):
             if local_min == 4:
                 update_edges(matrix_edges, clusters[i].individuals, increasing_explortion=True)
                 local_min = 0
-                # num_ants += 2
 
         old_best_cost = new_best_cost
 
@@ -228,3 +228,78 @@ def update_edges(matrix_edges, individuals, increasing_explortion: bool):
                     matrix_edges[i_ind.index][j_ind.index].update_tau()
     return
 
+# --------------------------------------------------------------------------------------------------------
+
+
+# ----------- Search Minimum for ackley function -----------
+def aco_algo_ackley(ackley):
+    max_iterations = 100
+    num_ants = 100
+    neighborhood_size = 100
+    global ALPHA
+    global BETA
+    global RHO
+    global PHEROMONE
+
+    # Initialize the best solution and best fitness
+    best_solution = None
+    best_fitness = float('inf')
+    ants = []
+
+    # Initialize the ants
+    for i in range(num_ants):
+        ant_coordinates = random.uniform(-32.768, 32.768)
+        ant = Individual(ant_coordinates)
+        ants.append(ant)
+
+    matrix_edges = init_matrix_edges(ants, minimum)
+
+    # Loop through the iterations
+    for iteration in range(max_iterations):
+        for ant in ants:
+            next_node = select_next_node(ant, matrix_edges)
+
+
+    return best_solution, best_fitness
+
+
+def select_next_node(ant, matrix_edges):
+    global ALPHA
+    global BETA
+    global RHO
+    global PHEROMONE
+    importance_edges = [edge.tau ** ALPHA + edge.eta ** BETA for edge in matrix_edges]
+    sum_importance_edges = sum(importance_edges)
+    pro_select_edges = [importance_edges[i] / sum_importance_edges for i in range(len(self.edges_neighborhood))]
+    next_index = pro_select_edges.index(max(pro_select_edges))
+    next_edge = self.edges_neighborhood[next_index]
+    next_node = next_edge.nodes[1]
+
+    return next_node
+
+
+# Initialize the edges matrix for a cluster
+def init_matrix_edges(ants, minimum):
+    matrix_size = len(ants) + 1
+    minimum_point = Individual(minimum)
+    matrix_edges = []
+
+    # Create List of list
+    for i in range(matrix_size):
+        matrix_edges.append([])
+        for j in range(matrix_size):
+            matrix_edges[i].append(None)
+
+    for i, i_ant in enumerate(ants):
+        for j, j_ant in enumerate(ants):
+            if i != j:
+                nodes = [i_ant, j_ant]
+                matrix_edges[i][j] = Edge(nodes)
+
+    for i, i_ant in enumerate(ants):
+        nodes = [minimum_point, i_ant]
+        matrix_edges[matrix_size-1][i] = Edge(nodes)
+        nodes = [i_ant, minimum_point]
+        matrix_edges[i][matrix_size-1] = Edge(nodes)
+
+    return matrix_edges

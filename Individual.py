@@ -15,5 +15,5 @@ class Individual:
         return math.dist(self.coordinates, other_ind.coordinates)
 
     def distance_func_ackley(self, other_ind):
-        return math.sqrt(sum([other_ind.coordinates[i]**2 for i in range(self.dimensions)]))
+        return math.sqrt(sum([other_ind.coordinates[i]**2 for i in range(len(self.coordinates))]))
 

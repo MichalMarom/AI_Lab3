@@ -80,6 +80,8 @@
         <watch expression="solution_path" />
         <watch expression="nearest_node_to_end" />
         <watch expression="path[1]" />
+        <watch expression="self.neighborhood[1]" />
+        <watch expression="path[0]" />
       </configuration>
     </watches-manager>
   </component>

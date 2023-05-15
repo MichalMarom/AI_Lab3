@@ -33,6 +33,16 @@ class AckleyFunction:
 
         return result
 
+    def function_coord(self, point):
+        sum_point = sum([point[i] ** 2 for i in range(self.dimensions)])
+        sum_cos = sum([np.cos(self.c * point[i]) for i in range(self.dimensions)])
+        result = -self.a *\
+            np.exp(-self.b * np.sqrt((1/self.dimensions) * sum_point)) -\
+            np.exp((1/self.dimensions) * sum_cos) + \
+            self.a + np.exp(1)
+
+        return result
+
     def objective_function(self, point):
         dist = np.sqrt(sum([point.coordinates[i]**2 for i in range(self.dimensions)]))
         return dist

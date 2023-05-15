@@ -232,19 +232,7 @@ def update_edges(matrix_edges, individuals, increasing_explortion: bool):
 
 
 # ----------- Search Minimum for ackley function -----------
-def ackley(x):
-    n = len(x)
-    a = 20
-    b = 0.2
-    c = 2 * np.pi
-    s1 = sum([np.power(xi, 2) for xi in x])
-    s2 = sum([np.cos(c * xi) for xi in x])
-    term1 = -a * np.exp(-b * np.sqrt(s1/n))
-    term2 = -np.exp(s2/n)
-    return term1 + term2 + a + np.exp(1)
-
-
-def aco_algo_ackley(ackley_t):
+def aco_algo_ackley(ackley):
     # max_iterations = 100
     # num_ants = 100
     # global ALPHA
@@ -290,7 +278,7 @@ def aco_algo_ackley(ackley_t):
     # Determine the dimensionality of the problem (Ackley is 30-dimensional)
     num_dimensions = 10
     num_ants = 100
-    num_iterations = 1000
+    num_iterations = 100
 
     # Define the bounds for each dimension of the problem (Ackley is bounded between -32.768 and 32.768)
     bounds = (-32.768, 32.768)
@@ -349,7 +337,7 @@ def aco_algo_ackley(ackley_t):
                 # Update the ant position and record the best position and fitness
                 ant_positions[ant][dimension] = bounds[0] + next_position * (bounds[1] - bounds[0]) / (num_dimensions - 1)
 
-                ant_fitness = ackley(ant_positions[ant])
+                ant_fitness = ackley.function_coord(ant_positions[ant])
                 if ant_fitness < ant_best_fitnesses[ant]:
                     ant_best_positions[ant][dimension] = ant_positions[ant][dimension]
                     ant_best_fitnesses[ant] = ant_fitness
@@ -368,7 +356,7 @@ def aco_algo_ackley(ackley_t):
                             pheromone_matrix[dimension, neighbor] = (1.0 - RHO) * pheromone_matrix[dimension, neighbor]
 
         # Update the global best solution and fitness
-        ant_best_fitnesses = [ackley(ant_best_positions[ant]) for ant in range(num_ants)]
+        ant_best_fitnesses = [ackley.function_coord(ant_best_positions[ant]) for ant in range(num_ants)]
         global_best_index = np.argmin(ant_best_fitnesses)
         if ant_best_fitnesses[global_best_index] < best_fitness:
             best_solution = ant_best_positions[global_best_index]

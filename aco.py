@@ -9,7 +9,7 @@ import numpy as np
 PHEROMONE = 50  # Amount of pheromone an ant borne with
 ALPHA = 1   # The importance of the pheromone on the edge in the probabilistic transition
 BETA = 1  # The importance of the length of the edge in the probabilistic transition
-RHO = 0.8  # The trail persistence or evaporation rate
+RHO = 0.5  # The trail persistence or evaporation rate
 
 
 class Ant:
@@ -232,56 +232,177 @@ def update_edges(matrix_edges, individuals, increasing_explortion: bool):
 
 
 # ----------- Search Minimum for ackley function -----------
-def aco_algo_ackley(ackley):
-    max_iterations = 100
+def ackley(x):
+    n = len(x)
+    a = 20
+    b = 0.2
+    c = 2 * np.pi
+    s1 = sum([np.power(xi, 2) for xi in x])
+    s2 = sum([np.cos(c * xi) for xi in x])
+    term1 = -a * np.exp(-b * np.sqrt(s1/n))
+    term2 = -np.exp(s2/n)
+    return term1 + term2 + a + np.exp(1)
+
+
+def aco_algo_ackley(ackley_t):
+    # max_iterations = 100
+    # num_ants = 100
+    # global ALPHA
+    # global BETA
+    # global RHO
+    # global PHEROMONE
+    #
+    # # Initialize the best solution and best fitness
+    # best_solution = None
+    # best_fitness = float('inf')
+    # ants = []
+    #
+    # # Initialize the ants
+    # for i in range(num_ants):
+    #     ant_coordinates = [random.uniform(-32.768, 32.768) for i in range(ackley.dimensions)]
+    #     ant = Individual.Individual(ant_coordinates)
+    #     ants.append(ant)
+    #
+    # matrix_edges = init_matrix_edges(ants, ackley.minimum)
+    #
+    # # Loop through the iterations
+    # for iteration in range(max_iterations):
+    #     next_nodes_score = []
+    #     next_ants_position = []
+    #     next_edges = []
+    #     for i, ant in enumerate(ants):
+    #         next_node, next_edge = select_next_node(i, matrix_edges)
+    #         next_nodes_score.append(ackley.function(next_node))
+    #         next_ants_position.append(next_node)
+    #         next_edges.append(next_edge)
+    #
+    #     best_ant_score = min(next_nodes_score)
+    #     if best_ant_score < best_fitness:
+    #         best_fitness = best_ant_score
+    #         best_solution = next_ants_position[next_nodes_score.index(best_ant_score)]
+    #
+    #     ants = [node for node in next_ants_position]
+    #     for edge in next_edges:
+    #         edge.update_tau()
+    #
+    # return best_solution, best_fitness
+
+    # Determine the dimensionality of the problem (Ackley is 30-dimensional)
+    num_dimensions = 10
     num_ants = 100
-    neighborhood_size = 100
-    global ALPHA
-    global BETA
-    global RHO
-    global PHEROMONE
+    num_iterations = 1000
 
-    # Initialize the best solution and best fitness
+    # Define the bounds for each dimension of the problem (Ackley is bounded between -32.768 and 32.768)
+    bounds = (-32.768, 32.768)
+
+    # Initialize the pheromone matrix with a small value
+    pheromone_matrix = np.ones((num_dimensions, num_dimensions))
+
+    # Initialize the best solution and fitness
     best_solution = None
-    best_fitness = float('inf')
-    ants = []
+    best_fitness = np.inf
 
-    # Initialize the ants
-    for i in range(num_ants):
-        ant_coordinates = random.uniform(-32.768, 32.768)
-        ant = Individual(ant_coordinates)
-        ants.append(ant)
+    # Initialize the ant positions and best fitnesses
+    ant_positions = np.zeros((num_ants, num_dimensions))
+    ant_best_positions = np.zeros((num_ants, num_dimensions))
+    ant_best_fitnesses = np.zeros(num_ants) + np.inf
 
-    matrix_edges = init_matrix_edges(ants, minimum)
+    for ant in range(num_ants):
+        # Initialize the ant position randomly within the bounds
+        ant_position = np.random.uniform(bounds[0], bounds[1], num_dimensions)
+        ant_positions[ant] = ant_position
 
     # Loop through the iterations
-    for iteration in range(max_iterations):
-        for ant in ants:
-            next_node = select_next_node(ant, matrix_edges)
+    for iteration in range(num_iterations):
+        # Loop through the ants
+        for ant in range(num_ants):
+            # # Initialize the ant position randomly within the bounds
+            # ant_position = np.random.uniform(bounds[0], bounds[1], num_dimensions)
+            # ant_positions[ant] = ant_position
 
+            # Loop through the dimensions of the problem
+            for dimension in range(num_dimensions):
+
+                # Calculate the probabilities of moving to each neighboring position
+                probabilities = np.zeros(num_dimensions)
+
+                # Loop through the neighboring positions
+                for neighbor in range(num_dimensions):
+                    # Calculate the pheromone level and distance to the neighboring position
+                    pheromone_level = pheromone_matrix[dimension, neighbor]
+                    distance = np.abs(neighbor - dimension)
+
+                    # Calculate the probability of moving to the neighboring position
+                    if distance != 0:
+                        probabilities[neighbor] = np.power(pheromone_level, ALPHA) * \
+                                                  np.power(1.0 / distance, BETA)
+                    else:
+                        probabilities[neighbor] = 0.0
+
+                # Normalize the probabilities and choose the next position probabilistically
+                if np.sum(probabilities) != 0:
+                    probabilities /= np.sum(probabilities)
+                    next_position = np.random.choice(range(num_dimensions), p=probabilities)
+                else:
+                    next_position = np.random.choice(range(num_dimensions))
+
+                # Update the ant position and record the best position and fitness
+                ant_positions[ant][dimension] = bounds[0] + next_position * (bounds[1] - bounds[0]) / (num_dimensions - 1)
+
+                ant_fitness = ackley(ant_positions[ant])
+                if ant_fitness < ant_best_fitnesses[ant]:
+                    ant_best_positions[ant][dimension] = ant_positions[ant][dimension]
+                    ant_best_fitnesses[ant] = ant_fitness
+                # elif ant_fitness == ant_best_fitnesses[ant]:
+                #     # Evaporate pheromone globally
+                #     pheromone_matrix[dimension] *= (1.0 - RHO)
+
+            # Update the pheromone matrix based on the ant's best position
+            for dimension in range(num_dimensions):
+                for neighbor in range(num_dimensions):
+                    if dimension != neighbor:
+                        if ant_best_positions[ant, dimension] == neighbor:
+                            pheromone_matrix[dimension, neighbor] = (1.0 - RHO) * pheromone_matrix[dimension, neighbor] + \
+                                                                PHEROMONE / ant_best_fitnesses[ant]
+                        else:
+                            pheromone_matrix[dimension, neighbor] = (1.0 - RHO) * pheromone_matrix[dimension, neighbor]
+
+        # Update the global best solution and fitness
+        ant_best_fitnesses = [ackley(ant_best_positions[ant]) for ant in range(num_ants)]
+        global_best_index = np.argmin(ant_best_fitnesses)
+        if ant_best_fitnesses[global_best_index] < best_fitness:
+            best_solution = ant_best_positions[global_best_index]
+            best_fitness = ant_best_fitnesses[global_best_index]
+
+        # Update the pheromone matrix globally based on the best ant's trail
+        for dimension in range(num_dimensions):
+            for neighbor in range(num_dimensions):
+                if dimension != neighbor:
+                    if ant_best_positions[ant, dimension] == neighbor:
+                        pheromone_matrix[dimension, neighbor] = (1.0 - RHO) * pheromone_matrix[dimension, neighbor] + \
+                                                                PHEROMONE / ant_best_fitnesses[ant]
+                    else:
+                        pheromone_matrix[dimension, neighbor] = (1.0 - RHO) * pheromone_matrix[dimension, neighbor]
 
     return best_solution, best_fitness
 
 
-def select_next_node(ant, matrix_edges):
-    global ALPHA
-    global BETA
-    global RHO
-    global PHEROMONE
-    importance_edges = [edge.tau ** ALPHA + edge.eta ** BETA for edge in matrix_edges]
+def select_next_node(ant_index, matrix_edges):
+    relevant_edges = [edge for edge in matrix_edges[ant_index] if edge is not None]
+    importance_edges = [edge.tau ** ALPHA + edge.eta ** BETA for edge in relevant_edges]
     sum_importance_edges = sum(importance_edges)
-    pro_select_edges = [importance_edges[i] / sum_importance_edges for i in range(len(self.edges_neighborhood))]
+    pro_select_edges = [importance_edges[i] / sum_importance_edges for i in range(len(relevant_edges))]
     next_index = pro_select_edges.index(max(pro_select_edges))
-    next_edge = self.edges_neighborhood[next_index]
+    next_edge = relevant_edges[next_index]
     next_node = next_edge.nodes[1]
 
-    return next_node
+    return [next_node, next_edge]
 
 
 # Initialize the edges matrix for a cluster
 def init_matrix_edges(ants, minimum):
     matrix_size = len(ants) + 1
-    minimum_point = Individual(minimum)
+    minimum_point = Individual.Individual(minimum)
     matrix_edges = []
 
     # Create List of list

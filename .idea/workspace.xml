@@ -82,6 +82,7 @@
         <watch expression="path[1]" />
         <watch expression="self.neighborhood[1]" />
         <watch expression="path[0]" />
+        <watch expression="pheromone_matrix" />
       </configuration>
     </watches-manager>
   </component>

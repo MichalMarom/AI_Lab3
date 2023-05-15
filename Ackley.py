@@ -4,7 +4,7 @@ import TabuSearch
 import aco
 import CooperativePSO
 # ----------- Python Package -----------
-import math
+import numpy as np
 # ----------- Consts Name  -----------
 Tabu_search = 0
 ACO = 1
@@ -17,7 +17,7 @@ class AckleyFunction:
     def __init__(self):
         self.a = 20
         self.b = 0.2
-        self.c = 2 * math.pi
+        self.c = 2 * np.pi
         self.dimensions = 10
         self.minimum = [0 for i in range(self.dimensions)]
         self.solution = 0
@@ -25,16 +25,16 @@ class AckleyFunction:
 
     def function(self, point):
         sum_point = sum([point.coordinates[i] ** 2 for i in range(self.dimensions)])
-        sum_cos = sum([math.cos(self.c * point.coordinates[i]) for i in range(self.dimensions)])
+        sum_cos = sum([np.cos(self.c * point.coordinates[i]) for i in range(self.dimensions)])
         result = -self.a *\
-            math.exp(-self.b * math.sqrt((1/self.dimensions) * sum_point)) -\
-            math.exp((1/self.dimensions) * sum_cos) + \
-            self.a + math.exp(1)
+            np.exp(-self.b * np.sqrt((1/self.dimensions) * sum_point)) -\
+            np.exp((1/self.dimensions) * sum_cos) + \
+            self.a + np.exp(1)
 
         return result
 
     def objective_function(self, point):
-        dist = math.sqrt(sum([point.coordinates[i]**2 for i in range(self.dimensions)]))
+        dist = np.sqrt(sum([point.coordinates[i]**2 for i in range(self.dimensions)]))
         return dist
 
     def find_minimum(self, algorithm_type):
@@ -61,7 +61,7 @@ class AckleyFunction:
 
     def solve_with_aco(self):
         self.solution, self.score = aco.aco_algo_ackley(self)
-        print("solution: ", self.solution.coordinates)
+        print("solution: ", self.solution)
         print("TOTAL SCORE: ", self.score)
         return
 

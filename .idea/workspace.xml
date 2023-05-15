@@ -58,13 +58,6 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/TabuSearch.py</url>
-          <line>213</line>
-          <option name="timeStamp" value="83" />
-        </line-breakpoint>
-      </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
           <properties notifyOnTerminate="true" exception="BaseException">
@@ -79,6 +72,17 @@
         <watch expression="optional_edges[0].nodes" />
         <watch expression="clusters[0].individuals[0]" />
         <watch expression="next_edge" />
+        <watch expression="solution_path[1]" />
+        <watch expression="solution_path[1]" />
+        <watch expression="solution_path[4]" />
+        <watch expression="edge_path" />
+        <watch expression="solution_path[2]" />
+        <watch expression="solution_path" />
+        <watch expression="nearest_node_to_end" />
+        <watch expression="path[1]" />
+        <watch expression="self.neighborhood[1]" />
+        <watch expression="path[0]" />
+        <watch expression="pheromone_matrix" />
       </configuration>
     </watches-manager>
   </component>

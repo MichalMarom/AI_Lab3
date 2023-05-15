@@ -1,166 +1,10 @@
 # ----------- File Form Lab -----------
 import Individual
+import Ackley
 # ----------- Python Package -----------
 import math
 import random
-
-
-# def tabu_search(clusters, start_point):
-#
-#     max_iterations = 20
-#     solution = []
-#     best_solution = []
-#     for i in range(len(clusters)):
-#         solution.append([])
-#         best_solution.append([])
-#
-#     best_score = []
-#     for i in range(len(clusters)):
-#         best_score.append(float('inf'))
-#
-#     for iteration in range(max_iterations):
-#         for i, cluster in enumerate(clusters):
-#             solution[i] = []
-#
-#             # Chose a random first node
-#             first_node = random.sample(cluster.individuals, 1)[0]
-#             # Add the first node to the solution path
-#             solution[i].append(first_node)
-#             # Remove the first node from the list of the optional nodes
-#             individuals = cluster.individuals.copy()
-#             individuals.remove(first_node)
-#             # Add the start node and  end node to the list of the optional nodes
-#             individuals.append(start_point)
-#
-#             circle_path = find_circle_path(solution[i], cluster.individuals, individuals)
-#             solution[i] = circle_path
-#
-#         for i, cluster in enumerate(clusters):
-#             score = calc_score(solution[i])
-#             if score < best_score[i]:
-#                 best_score[i] = score
-#                 best_solution[i] = solution[i]
-#
-#     for i, solution in enumerate(best_solution):
-#         solution = fix_circle_to_start(solution)
-#         solution.append(start_point)
-#         score = calc_score(solution)
-#         best_score[i] = score
-#         best_solution[i] = solution
-#
-#     return best_solution, sum(best_score)
-#
-#
-# def calc_score(solution):
-#     total_score = 0
-#     for j in range(len(solution) - 1):
-#         total_score += math.dist(solution[j].coordinates, solution[j + 1].coordinates)
-#
-#     return total_score
-#
-#
-# def find_circle_path(solution_path, individuals, update_individuals):
-#
-#     current_node = solution_path[0]
-#     while len(solution_path) < len(individuals):
-#         diff = len(individuals) - len(solution_path) - 1
-#         next_node = Local_search(update_individuals, current_node, solution_path, tabu_list_size=diff, tabu_time=3, max_iterations=10)
-#         solution_path.append(next_node)
-#         update_individuals.remove(next_node)
-#         current_node = next_node
-#     solution_path.append(update_individuals[0])
-#
-#     return solution_path
-#
-#
-# def fix_circle_to_start(circle_path):
-#     nodes_index = [node.index for node in circle_path]
-#     start_index = nodes_index.index(0)
-#     path = circle_path[start_index:] + circle_path[:start_index]
-#     return path
-#
-#
-# # Define the tabu search function
-# def Local_search(individuals, current_node, path_solution, tabu_list_size, tabu_time, max_iterations):
-#     # Initialize the tabu list with empty solutions
-#     tabu_list = [[current_node, 0]]
-#
-#     # Initialize the best solution and its objective function value
-#     best_solution = None
-#     best_value = float('inf')
-#
-#     # Iterate for a maximum number of iterations
-#     for i in range(max_iterations):
-#         neighborhood = valid_nodes(individuals, tabu_list)
-#         next_node = select_next_node(current_node, neighborhood)
-#
-#         # If there is no node that can be progressed to because all the nodes in the tabu list
-#         if next_node is None:
-#             # Remove a node from the tabu list that has been sitting there the longest
-#             next_node, tabu_list = oldest_node_in_tabu(tabu_list, current_node)
-#
-#         solution_next_node_value = objective_function(path_solution, next_node)
-#         tabu_list = add_node_tabu_list(tabu_list, tabu_list_size, next_node, i)
-#
-#         if solution_next_node_value < best_value:
-#             best_solution = next_node
-#             best_value = solution_next_node_value
-#         tabu_list = update_tabu_list(tabu_list, tabu_time, i)
-#
-#     # Return the best solution that found
-#     return best_solution
-#
-#
-# # Returns the oldest node form the tabu list
-# def oldest_node_in_tabu(tabu_list, current_node):
-#
-#     if tabu_list[0][0] == current_node:
-#         node = tabu_list[1][0]
-#         tabu_list.remove(tabu_list[1])
-#     else:
-#         node = tabu_list[0][0]
-#         tabu_list.remove(tabu_list[0])
-#
-#     return node, tabu_list
-#
-#
-# # Returns the valid nodes for selection that are not in the tabu list
-# def valid_nodes(individuals, tabu_list):
-#     valid_nodes_list = []
-#     tabu_list_coord = [ind[0].coordinates for ind in tabu_list]
-#
-#     for i, ind in enumerate(individuals):
-#         if ind.coordinates not in tabu_list_coord:
-#             valid_nodes_list.append(individuals[i])
-#
-#     return valid_nodes_list
-#
-#
-# # Selects the next closest node to the current node
-# def select_next_node(current_node, neighborhood):
-#     dist = [math.dist(current_node.coordinates, ind.coordinates) for ind in neighborhood]
-#     if dist:
-#         next_node_index = dist.index(min(dist))
-#         return neighborhood[next_node_index]
-#     else:
-#         return None
-#
-#
-# # Adding a node to the tabu list and updating the nodes in it
-# def add_node_tabu_list(tabu_list, tabu_list_size, new_node, current_time):
-#     if len(tabu_list) == tabu_list_size:
-#         tabu_list.remove(tabu_list[0])
-#     tabu_list.append([new_node, current_time])
-#     return tabu_list
-#
-#
-# # Define the objective function to be minimized (total distance)
-# def objective_function(solution: list, next_node):
-#     total_distance = 0
-#     for i in range(len(solution) - 1):
-#         total_distance += math.dist(solution[i].coordinates, solution[i+1].coordinates)
-#     total_distance += math.dist(solution[len(solution) - 1].coordinates, next_node.coordinates)
-#     return total_distance
+import numpy as np
 
 
 class Edge:
@@ -172,13 +16,14 @@ class Edge:
         self.length = math.dist(nodes[0].coordinates, nodes[1].coordinates)
 
 
+# ----------- Search path for each cluster -----------
 def tabu_search(clusters, start_point):
 
-    max_iterations = 10
+    max_iterations = 100
     solution = []
     solution_edges = []
     best_solution = []
-    flag = False
+
     for i in range(len(clusters)):
         solution.append([])
         solution_edges.append([])
@@ -188,7 +33,7 @@ def tabu_search(clusters, start_point):
     for i in range(len(clusters)):
         best_score.append(float('inf'))
 
-    while max_iterations > 0 or solution_is_empty(solution):
+    while max_iterations > 0:
         max_iterations -= 1
         for i, cluster in enumerate(clusters):
             solution[i] = []
@@ -204,31 +49,16 @@ def tabu_search(clusters, start_point):
             # Add the start node to the list of the optional nodes
             individuals.append(start_point)
 
-            solution[i], solution_edges[i] = find_circle_path(solution[i], solution_edges[i], cluster.individuals, individuals)
+            solution[i], solution_edges[i] = find_path(solution[i], solution_edges[i], cluster.individuals, individuals)
+            solution[i], solution_edges[i] = add_last_edge(solution[i], solution_edges[i], start_point)
 
         for i, cluster in enumerate(clusters):
-            if solution_edges[i]:
-                solution[i] = fix_circle_to_start(solution[i])
-                last_edge = Edge([solution[i][len(solution[i]) - 1], start_point])
-                for edge_path in solution_edges[i]:
-                    if lines_intersect(edge_path, last_edge):
-                        score = float('inf')
-                        flag = True
-                        break
-
-                if not flag:
-                    solution[i].append(start_point)
-                    solution_edges[i].append(last_edge)
-                    score = calc_score(solution[i])
-            else:
-                score = float('inf')
-
+            score = calc_score(solution[i])
             if score < best_score[i]:
                 best_score[i] = score
                 best_solution[i] = solution[i]
 
     for i, solution in enumerate(best_solution):
-        # solution = fix_circle_to_start(solution)
         score = calc_score(solution)
         best_score[i] = score
         best_solution[i] = solution
@@ -236,7 +66,8 @@ def tabu_search(clusters, start_point):
     return best_solution, sum(best_score)
 
 
-def find_circle_path(solution_path, solution_edges, individuals, update_individuals):
+# Finding the path and returns the nodes and edges
+def find_path(solution_path, solution_edges, individuals, update_individuals):
 
     #while len(solution_path) < len(individuals) - 1:
     while len(update_individuals) > 1:
@@ -245,13 +76,14 @@ def find_circle_path(solution_path, solution_edges, individuals, update_individu
         optional_edges = find_optional_edges(current_node, solution_edges, update_individuals)
         if not optional_edges:
             return [], []
-        next_edge = Local_search_edges(optional_edges, solution_edges, tabu_list_size=diff, tabu_time=2, max_iterations=10)
+        next_edge = Local_search_edges(optional_edges, solution_edges, tabu_list_size=diff, tabu_time=1, max_iterations=100)
 
         # Update the path solution
         solution_path.append(next_edge.nodes[1])
         solution_edges.append(next_edge)
         update_individuals.remove(next_edge.nodes[1])
 
+    # Adding the last edge to the path
     last_edge = Edge([next_edge.nodes[1], update_individuals[0]])
     for edge_path in solution_edges:
         if lines_intersect(edge_path, last_edge):
@@ -263,6 +95,7 @@ def find_circle_path(solution_path, solution_edges, individuals, update_individu
     return solution_path, solution_edges
 
 
+# Returns the optional edges from the current node without intersecting the path edges
 def find_optional_edges(current_node, solution_edges, individuals):
     optional_edges = [Edge([current_node, ind]) for ind in individuals]
     edges = optional_edges.copy()
@@ -275,25 +108,53 @@ def find_optional_edges(current_node, solution_edges, individuals):
     return optional_edges
 
 
-def calc_score(solution):
-    total_score = sum([math.dist(solution[i].coordinates, solution[i+1].coordinates) for i in range(len(solution)-1)])
-    return total_score
+# Adding the last edge between the last node in the path and the first node
+def add_last_edge(solution_path, solution_edges, start_point):
+    if solution_path:
+        solution_path, solution_edges = fix_path_to_start(solution_path, solution_edges)
+        # if not solution_path:
+        #     return [], []
+
+        last_node = solution_path[len(solution_path) - 1]
+        last_edge = Edge([last_node, start_point])
+        # for edge_path in solution_edges:
+        #     if lines_intersect(edge_path, last_edge):
+        #         return [], []
+
+        solution_path.append(start_point)
+        solution_edges.append(last_edge)
+        return solution_path, solution_edges
+
+    else:
+        return [], []
 
 
-def solution_is_empty(solution):
-    for item in solution:
-        if not item:
-            return True
-    return False
-
-def fix_circle_to_start(circle_path):
+# Correcting the path so that it starts from point 0
+def fix_path_to_start(circle_path, solution_edges):
+    first_edge = Edge([circle_path[0], circle_path[len(circle_path) - 1]])
     nodes_index = [node.index for node in circle_path]
     start_index = nodes_index.index(0)
     path = circle_path[start_index:] + circle_path[:start_index]
-    return path
+
+    # for edge_path in solution_edges:
+    #     if lines_intersect(edge_path, first_edge):
+    #         return [], []
+
+    solution_edges.append(first_edge)
+    return path, solution_edges
 
 
-# Define the tabu search function
+# Calculate the length of the path
+def calc_score(solution):
+    if solution:
+        total_score = sum([math.dist(solution[i].coordinates, solution[i+1].coordinates) for i in range(len(solution)-1)])
+    else:
+        total_score = float('inf')
+
+    return total_score
+
+
+# ----------- Local Search using a tabu list -----------
 def Local_search_edges(optional_edges, solution_edges, tabu_list_size, tabu_time, max_iterations):
     # Initialize the tabu list with empty solutions
     tabu_list = []
@@ -323,6 +184,7 @@ def Local_search_edges(optional_edges, solution_edges, tabu_list_size, tabu_time
     return best_solution
 
 
+# Returns the legal edges that are not in the tabu list
 def valid_edges(edges, tabu_list):
     valid_edge_list = []
     tabu_list_nodes = [item[0].nodes for item in tabu_list]
@@ -334,7 +196,7 @@ def valid_edges(edges, tabu_list):
     return valid_edge_list
 
 
-# Selects the next closest node to the current node
+# Selects the shortest edge from the current node
 def select_next_edge(neighborhood):
     dist = [edge.length for edge in neighborhood]
     if dist:
@@ -351,7 +213,7 @@ def objective_function_edge(solution: list, next_edge):
     return total_distance
 
 
-# Adding a node to the tabu list and updating the nodes in it
+# Adding a edge to the tabu list and updating the edges in it
 def add_edge_tabu_list(tabu_list, tabu_list_size, next_edge, current_time):
     if len(tabu_list) == tabu_list_size:
         tabu_list.remove(tabu_list[0])
@@ -375,6 +237,7 @@ def update_tabu_list(tabu_list, tabu_time, current_time):
     return update_tabu
 
 
+# Returning and deleting the oldest node in the taboo list
 def oldest_node_in_tabu(tabu_list):
 
     node = tabu_list[0][0]
@@ -383,6 +246,7 @@ def oldest_node_in_tabu(tabu_list):
     return node, tabu_list
 
 
+# ----------- Check for Intersections -----------
 def lines_intersect(edge_1, edge_2):
     # Compute the directions of the four line segments
     a1 = edge_1.nodes[0]
@@ -405,3 +269,98 @@ def lines_intersect(edge_1, edge_2):
 def direction(p, q, r):
     return (q.coordinates[1] - p.coordinates[1]) * (r.coordinates[0] - q.coordinates[0]) \
            - (q.coordinates[0] - p.coordinates[0]) * (r.coordinates[1] - q.coordinates[1])
+
+
+# --------------------------------------------------------------------------------------------------------
+# ----------- Search Minimum for ackley function -----------
+def tabu_search_ackley(ackley: Ackley.AckleyFunction):
+    max_iterations = 100
+    tabu_list = []
+    best_solution = None
+    best_score = float('inf')
+    tabu_list_size = math.sqrt(max_iterations)
+    tabu_time = 10
+    neighborhood_size = 100
+
+    # Chose a random first node
+    first_node_coordinates = [random.uniform(-32.768, 32.768) for i in range(ackley.dimensions)]
+    first_node = Individual.Individual(first_node_coordinates)
+    # Add the first node to the solution path
+    tabu_list.append([first_node, 0])
+    current_node = first_node
+
+    for i in range(max_iterations):
+        neighborhood = find_neighborhood(current_node, tabu_list, ackley, neighborhood_size)
+        next_node = select_next_node(neighborhood, ackley)
+        score = ackley.function(next_node)
+        tabu_list = add_node_tabu_list(tabu_list, tabu_list_size, next_node, i)
+        current_node = next_node
+
+        if score < best_score:
+            best_score = score
+            best_solution = next_node
+        elif 0 <= abs(score-best_score) <= 1:
+            # Chose a random first node
+            first_node_coordinates = [random.uniform(-32.768, 32.768) for i in range(ackley.dimensions)]
+            first_node = Individual.Individual(first_node_coordinates)
+            # Add the first node to the solution path
+            tabu_list.clear()
+            tabu_list.append([first_node, i])
+            current_node = first_node
+
+        tabu_list = update_tabu_list_ackley(tabu_list, tabu_time, i)
+
+    return best_solution, best_score
+
+
+def find_neighborhood(current_node, tabu_list, ackley, neighborhood_size):
+    neighborhood = []
+    tabu_list_coordinates = [item[0].coordinates for item in tabu_list]
+    sigma = 0.1
+
+    for i in range(neighborhood_size):
+        while True:
+            perturbation = np.random.normal(loc=0.0, scale=sigma, size=ackley.dimensions)
+            neighbor_coordinates = current_node.coordinates + perturbation
+            if not neighbor_in_tabu(neighbor_coordinates, tabu_list_coordinates):
+                neighborhood.append(Individual.Individual(neighbor_coordinates))
+                break
+
+    return neighborhood
+
+
+def neighbor_in_tabu(neighbor_coordinates, tabu_list_coordinates):
+    for node in tabu_list_coordinates:
+        for i in range(len(node)):
+            if node[i] == neighbor_coordinates[i]:
+                return True
+    return False
+
+
+def select_next_node(neighborhood, ackley):
+    function_list = [ackley.function(neighbor) for neighbor in neighborhood]
+    min_neighbor_index = function_list.index(min(function_list))
+    return neighborhood[min_neighbor_index]
+
+
+def add_node_tabu_list(tabu_list, tabu_list_size, next_node, current_time):
+    if len(tabu_list) == tabu_list_size:
+        tabu_list.remove(tabu_list[0])
+    tabu_list.append([next_node, current_time])
+    return tabu_list
+
+
+def update_tabu_list_ackley(tabu_list, tabu_time, current_time):
+    update_tabu = tabu_list.copy()
+
+    # removing individuals
+    for i, ind in enumerate(tabu_list):
+        if current_time - ind[1] >= tabu_time:
+            update_tabu.remove(tabu_list[i])
+
+    # update the time
+    for ind in update_tabu:
+        ind[1] += 1
+
+    return update_tabu
+

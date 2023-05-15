@@ -1,5 +1,6 @@
 # ----------- File For Genetic Algorithm -----------
 import Population
+import Ackley
 # ----------- Python Package -----------
 import time
 import threading
@@ -34,6 +35,10 @@ class FlowManager:
 
     def solve_CVRP(self):
         self.population.create_clusters()
-        self.population.solve_clustrers_TSP(Tabu_search)
+        self.population.solve_clustrers_TSP(Cooperative_PSO)
 
         return
+
+    def find_minimum_ackley(self):
+        ackley_function = Ackley.AckleyFunction()
+        ackley_function.find_minimum(ACO)

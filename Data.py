@@ -54,7 +54,7 @@ class Data:
 
     def _init_consts(self):
         self.pop_size = 100
-        self.max_generations = 100
+        self.max_generations = 10
         # self.max_age = 101
         
         return

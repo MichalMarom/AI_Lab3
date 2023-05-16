@@ -62,6 +62,8 @@ class Population:
         
         print(f"population len-> {len(self.population)}")
         print(f"individuals len-> {len(self.population[0].gen)}")
+        
+        print(f"the first individual-> {self.population[0].gen[0].coordinates}")
         return
     
     def set_fitnesses(self):
@@ -82,6 +84,7 @@ class Population:
 
             gen_time = time.time()
             print(f"========================================= {generation_index}")
+            print(f"fitnesses for this gen is {self.fitnesses}")
             print(f"Average for this gen is {new_average}")
             print(f"Selection Pressure for this gen is {new_variance}")
             # self.show_histogram(self.fitnesses)
@@ -134,10 +137,12 @@ class Population:
                     mutation_individuals -= 1
 
                 offspring.append(child)
-                temp = []
-                temp = [temp.append(child.gen[i].index) for i in range(child.gen_len)]
-                print(f"the gen is -> {temp}")
-                print(f"the score is -> {child.score}")
+            # print(f"the elites is -> {elites}")
+            # print(f"the offspring is -> {offspring}")
+            # temp = []
+            # temp = [temp.append(child.gen[i].index) for i in range(child.gen_len)]
+            # print(f"the gen is -> {temp}")
+            # print(f"the score is -> {child.score}")
 
             self.population = elites + offspring
 

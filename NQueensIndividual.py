@@ -13,6 +13,7 @@ class NQueensIndividual:
     gen: list
     start_point: Individual
     end_point: Individual
+    score: float
 
     def __init__(self, 
                  data: Data, 
@@ -38,16 +39,16 @@ class NQueensIndividual:
     def original_fitness(self, data: Data):
         total_distance = 0
 
-        self.gen.append(self.start_point)
+        self.gen.insert(0 ,self.start_point)
         self.gen.append(self.end_point)
 
-        for i, individual in enumerate(self.gen):
-            x1, y1 = individual.coordinates
-            try:
-                x2, y2 = next(individual).coordinates
-            except:
-                x2, y2 = x1, y1
-            total_distance -= math.sqrt((x2-x1)**2 + (y2-y1)**2)
+        for i in range(len(self.gen)-1):
+            x1, y1 = self.gen[i].coordinates
+            # print(f"x1 y1 = {x1,y1}")
+            x2, y2 = self.gen[i+1].coordinates
+            # print(f"x2 y2 = {x2,y2}")
+            total_distance += math.sqrt((x2-x1)**2 + (y2-y1)**2)
+            # print(f"score = {total_distance}")
 
         self.gen.remove(self.gen[0])
         self.gen.remove(self.gen[-1])

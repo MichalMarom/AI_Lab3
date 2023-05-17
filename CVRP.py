@@ -330,29 +330,29 @@ class CVRP:
             self.islands.append(Population.Population(cluster, self.start_point, self.end_point))
         
         # Create and start threads for each island
-        # threads = []
-        # for i, island in enumerate(self.islands):
-        #     thread = threading.Thread(target = self.islands[i].genetic_algorithm, 
-        #                               args=())
-        #     threads.append(thread)
+        threads = []
+        for i, island in enumerate(self.islands):
+            thread = threading.Thread(target = self.islands[i].genetic_algorithm, 
+                                      args=())
+            threads.append(thread)
         
-        # for thread in threads:
-        #     thread.start()
+        for thread in threads:
+            thread.start()
 
-        # # Wait for all threads to finish
-        # for thread in threads:
-        #     thread.join()
+        # Wait for all threads to finish
+        for thread in threads:
+            thread.join()
 
-        # for i, island in enumerate(self.islands):
-        #     self.solution.append(self.islands[i].get_solution())
-        #     self.total_score += island.best_fitness
+        for i, island in enumerate(self.islands):
+            self.solution.append(self.islands[i].get_solution())
+            self.total_score += island.best_fitness
 
-        # for path in self.solution:
-        #     print("----------------")
-        #     for point in path:
-        #         print(point.index)
+        for path in self.solution:
+            print("----------------")
+            for point in path:
+                print(point.index)
 
-        self.islands[0].genetic_algorithm()
+        # self.islands[0].genetic_algorithm()
 
 
         print("TOTAL SCORE: ", int(self.total_score))

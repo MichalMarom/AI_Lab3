@@ -41,4 +41,4 @@ class FlowManager:
 
     def find_minimum_ackley(self):
         ackley_function = Ackley.AckleyFunction()
-        ackley_function.find_minimum(ACO)
+        ackley_function.find_minimum(Simulated_Annealing)

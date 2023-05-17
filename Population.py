@@ -32,7 +32,7 @@ class Population:
     gen_len: int
 
     best_fitness: float
-    best_individual: Individual
+    best_individual: NQueensIndividual
     center: Individual
     optimization_func: int
     fitnesses: list
@@ -60,10 +60,10 @@ class Population:
             self.population.append(individual)
             self.set_fitnesses()
         
-        print(f"population len-> {len(self.population)}")
-        print(f"individuals len-> {len(self.population[0].gen)}")
+        # print(f"population len-> {len(self.population)}")
+        # print(f"individuals len-> {len(self.population[0].gen)}")
         
-        print(f"the first individual-> {self.population[0].gen[0].coordinates}")
+        # print(f"the first individual-> {self.population[0].gen[0].coordinates}")
         return
     
     def set_fitnesses(self):
@@ -86,13 +86,14 @@ class Population:
             print(f"========================================= {generation_index}")
             print(f"fitnesses for this gen is {self.fitnesses}")
             print(f"Average for this gen is {new_average}")
-            print(f"Selection Pressure for this gen is {new_variance}")
+            # print(f"Selection Pressure for this gen is {new_variance}")
             # self.show_histogram(self.fitnesses)
 
             # Select the best individuals for reproduction
             elite_size = int(self.data.pop_size * ELITE_PERCENTAGE)
-            elite_indices = sorted(range(self.data.pop_size), key=lambda i: self.fitnesses[i], reverse=True)[:elite_size]
-            elites = [self.population[i] for i in elite_indices]
+            elite_indices = sorted(self.population, key=lambda NQueenInd: NQueenInd.score, reverse=False)[:elite_size]
+            elites = elite_indices #[self.population[i] for i in elite_indices]
+            [print(f"the elite scores {elites[i].score}") for i in range(elite_size)]
 
             # Generate new individuals by applying crossover and mutation operators
             offspring = []
@@ -101,26 +102,34 @@ class Population:
                 parent2 = random.choice(elites)
 
                 child_gen = []
-                ran = random.random()
-                copy_objects = parent1.gen.copy()
-
-                parent1_part = int(len(copy_objects)*ran)
-                parent2_part = len(copy_objects) - parent1_part
-
-                for i in range(parent1_part):
-                    object = random.sample(copy_objects, 1)[0]
-                    if object in parent1.gen:
-                        child_gen.append(object)
-                        copy_objects.remove(object)
-                        break
-
-                for i in range(parent2_part):
-                    object = random.sample(copy_objects, 1)[0]
-                    if object in parent2.gen:
-                        child_gen.append(object)
-                        copy_objects.remove(object)
-                        break
+                child_gen = self.pmx_shuffle(parent1, parent2, self.gen_len)
                 
+                # ran = random.randint(1, self.gen_len)
+                # copy_objects = parent1.gen.copy()
+                # print(f"1 copy_objects len {len(copy_objects)}")
+                # print(f" copy_objects objects {copy_objects}")
+
+                # print(f" gen len {self.gen_len}")
+                
+                # parent1_prop_size = ran
+                # parent2_prop_size = self.gen_len - ran
+
+                # print(f" parent 1 len {parent1_prop_size} , parent 2 len {parent2_prop_size}")
+
+                # for i in range(parent1_prop_size):
+                #     object = random.sample(copy_objects, 1)
+                #     child_gen.append(object)
+                #     copy_objects.remove(object)
+                        
+                        
+                # print(f"2 copy_objects len {len(copy_objects)}, child len {len(child_gen)}")
+                # for i in range(parent2_prop_size):
+                #     object = random.sample(copy_objects, 1)
+                #     child_gen.append(object)
+                #     copy_objects.remove(object)
+
+                        
+                # print(f"3 copy_objects len {len(copy_objects)}, child len {len(child_gen)}")
                 child = NQueensIndividual.NQueensIndividual(self.data,
                                                             child_gen,
                                                             self.start_point, 
@@ -128,6 +137,7 @@ class Population:
 
                 child.gen = child_gen
                 child.gen_len = len(child_gen)
+                print(f"new child len { child.gen_len }")
                 child.update_score(self.data)
                 
                 # mutation
@@ -149,10 +159,8 @@ class Population:
             # Update the size of the  population
             self.data.pop_size = len(self.population)
 
-            print(f"The absolute time for this gen is {time.time() - gen_time} sec")
-            print(f"The ticks time for this gen is {int(time.perf_counter())}")
-
-
+            # print(f"The absolute time for this gen is {time.time() - gen_time} sec")
+            # print(f"The ticks time for this gen is {int(time.perf_counter())}")
 
 
         # Find the individual with the highest fitness
@@ -162,20 +170,56 @@ class Population:
             individual.update_score(self.data)
             if self.best_individual.score < individual.score:
                 self.best_individual = individual
-                print("changed best individual------------------------------")
+                # print("changed best individual------------------------------")
 
         self.best_fitness = self.best_individual.score
 
-        # print(f"population len-> {len(self.population)}")
-        # print(f"best individual len-> {len(self.best_individual.gen)}")
+        print(f"population len-> {len(self.population)}")
+        print(f"best individual len-> {len(self.best_individual.gen)}")
         # print(f"individuals len-> {len(self.population[0].gen)}")
 
 
 
-        # print(f"sol-> {self.best_individual.gen}")
-        # print(f"score-> {self.best_fitness}")
+        [print(f"sol-> {ind.index}->") for ind in self.best_individual.gen]
+        print(f"score-> {self.best_fitness}")
         return
     
+    def pmx_shuffle(self, parent1: NQueensIndividual, parent2: NQueensIndividual, num_genes: int):
+        p1 = parent1.gen
+        p2 = parent2.gen
+        rand_a = random.randint(0, int(num_genes / 2))
+
+        for i in range(rand_a):
+            temp_p1 = p1[i]  # set the indexes
+            temp_p2 = p2[i]
+            try:
+                temp_index1 = p1.index(p2[i])
+                temp_index2 = p2.index(p1[i])
+
+                p1[i] = p1[temp_index1]  # switch the values
+                p1[temp_index1] = temp_p1
+
+                p2[i] = p2[temp_index2]
+                p2[temp_index2] = temp_p2
+
+            except:
+                pass
+
+        rand_a = random.randint(0, num_genes)
+        child_gen = [p1[i] if i < rand_a else p2[i] for i in range(num_genes)]
+
+        return child_gen
+
+    def get_solution(self):
+        solution = []
+        solution.append(self.start_point)
+        
+        for individual in self.best_individual.gen:
+            solution.append(individual)
+
+        solution.append(self.end_point)
+        return solution
+
     def average_fitness(self, fitness: list): 
         if not fitness:
             return 0

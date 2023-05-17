@@ -38,6 +38,7 @@ class NQueensIndividual:
     
     def original_fitness(self, data: Data):
         total_distance = 0
+        # print(f"individual len-> {len(self.gen)}")
 
         self.gen.insert(0 ,self.start_point)
         self.gen.append(self.end_point)
@@ -52,7 +53,7 @@ class NQueensIndividual:
 
         self.gen.remove(self.gen[0])
         self.gen.remove(self.gen[-1])
-
+        # print(f" the score is - {total_distance}")
         return total_distance
 
     def mutation(self, data: Data):

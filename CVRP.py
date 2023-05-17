@@ -344,18 +344,18 @@ class CVRP:
         #     thread.join()
 
         # for i, island in enumerate(self.islands):
-        #     self.solution.append(self.islands[i].best_individual)
+        #     self.solution.append(self.islands[i].get_solution())
         #     self.total_score += island.best_fitness
-
-        self.islands[0].genetic_algorithm()
-
 
         # for path in self.solution:
         #     print("----------------")
         #     for point in path:
         #         print(point.index)
 
-        # print("TOTAL SCORE: ", int(self.total_score))
+        self.islands[0].genetic_algorithm()
+
+
+        print("TOTAL SCORE: ", int(self.total_score))
 
         return
     

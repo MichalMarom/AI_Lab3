@@ -1,12 +1,16 @@
 # ----------- File For Genetic Algorithm -----------
 import CVRP
+import Ackley
 # ----------- Python Package -----------
 import time
 import threading
 # ----------- Consts Name  ----------
 NUM_ISLANDS = 2
-TABU_SEARCH = 1
-SIMULATED_ANNEALING = 2
+Tabu_search = 0
+ACO = 1
+Simulated_Annealing = 2
+GA = 3
+Cooperative_PSO = 4
 ISLANDS = 3
 
 class FlowManager:
@@ -34,3 +38,7 @@ class FlowManager:
         self.cvrp.solve_clustrers_TSP(ISLANDS)
         
         return
+
+    def find_minimum_ackley(self):
+        ackley_function = Ackley.AckleyFunction()
+        ackley_function.find_minimum(ACO)

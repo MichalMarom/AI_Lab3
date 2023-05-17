@@ -11,7 +11,7 @@ def main():
     flow_manager.solve_CVRP()
     # flow_manager.print_pop()
     flow_manager.print_graph()
-    return
+    # flow_manager.find_minimum_ackley()
 
 
 if __name__ == "__main__":

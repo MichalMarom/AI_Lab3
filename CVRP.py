@@ -8,7 +8,6 @@ import TabuSearch
 import aco
 import CooperativePSO
 import Population
-
 # ----------- Python Package -----------
 import random
 import math
@@ -50,6 +49,7 @@ class CVRP:
         # self.start_point = Individual.Individual([0,0], 0, 0)
         # self.end_point = Individual.Individual([0,0], 0, len(self.individuals))
         self.clusters = []
+        self.islands = []
         self.total_score = 0
         self.solution = []
         self.read_problem_file()
@@ -306,8 +306,8 @@ class CVRP:
         elif algorithm_type == Simulated_Annealing:
             self.solve_with_simulated_anealing()
 
-        #elif algorithm_type == GA:
-            # self.solve_with_Cooperative_PSO()
+        elif algorithm_type == GA:
+            self.solve_with_islands_genetic_algo()
 
         elif algorithm_type == Cooperative_PSO:
             self.solve_with_Cooperative_PSO()

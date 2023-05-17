@@ -21,7 +21,7 @@ MAX_TRY = 5
 MAX_TRY_CLUSTER = 100
 
 
-class Population:
+class CVRP:
     data: Data
     max_capacity: int
     supermarket_number: int

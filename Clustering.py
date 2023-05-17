@@ -13,10 +13,10 @@ class Cluster:
     start_point: Individual
     end_point: Individual
 
-    def __init__(self, population: list, 
+    def __init__(self, cvrp: list, 
                  center: Individual = None):
 
-        self.individuals = population
+        self.individuals = cvrp
         if center == None:
             self.update_center()
         else:
@@ -68,14 +68,14 @@ class Cluster:
         self.center = self.individuals[min_individual_index]
 
 
-def best_fit(population: list, max_capacity: int):
+def best_fit(cvrp: list, max_capacity: int):
 
     # Sort the items in decreasing order of size
-    objects = [(i, ind.demand) for i, ind in enumerate(population)]
+    objects = [(i, ind.demand) for i, ind in enumerate(cvrp)]
     objects = sorted(objects, key=lambda a: a[1], reverse=True)
 
     # Initialize the bins list with the first item
-    bins = [[population[objects[0][0]]]]
+    bins = [[cvrp[objects[0][0]]]]
 
     # Loop through the remaining items
     for item in objects[1:]:
@@ -83,36 +83,36 @@ def best_fit(population: list, max_capacity: int):
         for bin in bins:
             sum_bin = sum([ind.demand for ind in bin])
             if sum_bin + item[1] <= max_capacity:
-                bin.append(population[item[0]])
+                bin.append(cvrp[item[0]])
                 break
         else:
             # If the item does not fit in any existing bin, create a new bin
-            bins.append([population[item[0]]])
+            bins.append([cvrp[item[0]]])
     return bins
 
 
-def clustering(population: list, k: int):
+def clustering(cvrp: list, k: int):
     clusters_centers_update = []
     while True:
-        clusters_centers_previous, clusters_previous = knn(k, population, clusters_centers_update)
+        clusters_centers_previous, clusters_previous = knn(k, cvrp, clusters_centers_update)
         clusters_centers_update = update_clusters_centers(clusters_previous)
-        clusters_centers_update, clusters_update = knn(k, population, clusters_centers_update)
+        clusters_centers_update, clusters_update = knn(k, cvrp, clusters_centers_update)
         if equal_centers(clusters_centers_previous, clusters_centers_update):
             break
 
     return clusters_centers_update, clusters_update
 
 
-def knn(k: int, population: list, clusters_centers: list):
+def knn(k: int, cvrp: list, clusters_centers: list):
     clusters = []
 
     if not clusters_centers:
-        clusters_centers = random.sample(population, k)
+        clusters_centers = random.sample(cvrp, k)
 
     for i in range(len(clusters_centers)):
         clusters.append([])
 
-    for individual in population:
+    for individual in cvrp:
         dist = [math.dist(individual.coordinates, center.coordinates) for center in clusters_centers]
         min_dist_centers = []
         for index, center in enumerate(clusters_centers):

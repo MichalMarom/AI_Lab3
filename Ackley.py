@@ -77,17 +77,21 @@ class AckleyFunction:
 
     def solve_with_simulated_anealing(self):
 
-        for cluster in self.clusters:
-            simulated_annealing_instance = SimulatedAnnealing.SimulatedAnnealing(cluster,
-                                                                                 self.start_point,
-                                                                                 self.end_point)
-            simulated_annealing_instance.simulated_annealing()
-            solution, score = simulated_annealing_instance.get_solution_and_socre()
-            self.solution.append(solution)
-            self.total_score += score
+        # for cluster in self.clusters:
+        #     simulated_annealing_instance = SimulatedAnnealing.SimulatedAnnealing(cluster,
+        #                                                                          self.start_point,
+        #                                                                          self.end_point)
+        #     simulated_annealing_instance.simulated_annealing()
+        #     solution, score = simulated_annealing_instance.get_solution_and_socre()
+        #     self.solution.append(solution)
+        #     self.total_score += score
 
-        print("TOTAL SCORE: ", int(self.total_score))
+        # print("TOTAL SCORE: ", int(self.total_score))
 
+        simulated_annealing_instance = SimulatedAnnealing.SimulatedAnnealing()
+        self.solution, self.score = simulated_annealing_instance.solve_ackley(self)
+        print("solution: ", self.solution)
+        print("TOTAL SCORE: ", self.score)
         return
 
     def solve_with_Cooperative_PSO(self):

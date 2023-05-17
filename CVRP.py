@@ -1,4 +1,5 @@
 # ----------- File Form Lab -----------
+import threading
 import Data
 import Individual
 import Clustering
@@ -6,6 +7,7 @@ import SimulatedAnnealing
 import TabuSearch
 import aco
 import CooperativePSO
+import Population
 # ----------- Python Package -----------
 import random
 import math
@@ -20,6 +22,10 @@ Cooperative_PSO = 4
 MAX_TRY = 5
 MAX_TRY_CLUSTER = 100
 
+TABU_SEARCH = 1
+SIMULATED_ANNEALING = 2
+ISLANDS = 3
+
 
 class CVRP:
     data: Data
@@ -32,7 +38,8 @@ class CVRP:
     end_point: Individual
 
     clusters: list
-
+    islands: list
+    
     total_score: float
     solution: list
 
@@ -42,6 +49,7 @@ class CVRP:
         # self.start_point = Individual.Individual([0,0], 0, 0)
         # self.end_point = Individual.Individual([0,0], 0, len(self.individuals))
         self.clusters = []
+        self.islands = []
         self.total_score = 0
         self.solution = []
         self.read_problem_file()
@@ -298,8 +306,8 @@ class CVRP:
         elif algorithm_type == Simulated_Annealing:
             self.solve_with_simulated_anealing()
 
-        #elif algorithm_type == GA:
-            # self.solve_with_Cooperative_PSO()
+        elif algorithm_type == GA:
+            self.solve_with_islands_genetic_algo()
 
         elif algorithm_type == Cooperative_PSO:
             self.solve_with_Cooperative_PSO()
@@ -339,5 +347,38 @@ class CVRP:
         self.solution, self.total_score = CooperativePSO.cooperative_pso(self.clusters, self.start_point)
         print("TOTAL SCORE: ", self.total_score)
         return
+    
+    def solve_with_islands_genetic_algo(self):
+        # Initialize the cvrp for the current island
+        for i, cluster in enumerate(self.clusters):
+            self.islands.append(Population.Population(cluster, self.start_point, self.end_point))
+        
+        # Create and start threads for each island
+        threads = []
+        for i, island in enumerate(self.islands):
+            thread = threading.Thread(target = self.islands[i].genetic_algorithm, 
+                                      args=())
+            threads.append(thread)
+        
+        for thread in threads:
+            thread.start()
+
+        # Wait for all threads to finish
+        for thread in threads:
+            thread.join()
+
+        for i, island in enumerate(self.islands):
+            self.solution.append(self.islands[i].get_solution())
+            self.total_score += island.best_fitness
+
+        for path in self.solution:
+            print("----------------")
+            for point in path:
+                print(point.index)
+
+        print("TOTAL SCORE: ", int(self.total_score))
+
+        return
+
 
 

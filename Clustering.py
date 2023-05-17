@@ -10,8 +10,8 @@ class Cluster:
     center: Individual
     sum_demands: int
     score: float
-    start_point: Individual
-    end_point: Individual
+    # start_point: Individual
+    # end_point: Individual
 
     def __init__(self, cvrp: list, 
                  center: Individual = None):

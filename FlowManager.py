@@ -11,7 +11,7 @@ ACO = 1
 Simulated_Annealing = 2
 GA = 3
 Cooperative_PSO = 4
-
+ISLANDS = 3
 
 class FlowManager:
     cvrp: CVRP
@@ -35,8 +35,8 @@ class FlowManager:
 
     def solve_CVRP(self):
         self.cvrp.create_clusters()
-        self.cvrp.solve_clustrers_TSP(Simulated_Annealing)
-
+        self.cvrp.solve_clustrers_TSP(ISLANDS)
+        
         return
 
     def find_minimum_ackley(self):

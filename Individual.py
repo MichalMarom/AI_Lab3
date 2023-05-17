@@ -5,6 +5,7 @@ class Individual:
     coordinates: list
     demand: float
     index: int
+    gen_len: int
 
     def __init__(self, cord: list, demand: float = 0, index: int = 0):
         self.coordinates = cord

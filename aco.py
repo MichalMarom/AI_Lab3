@@ -276,7 +276,7 @@ def aco_algo_ackley(ackley):
     # return best_solution, best_fitness
 
     # Determine the dimensionality of the problem (Ackley is 30-dimensional)
-    num_dimensions = 10
+    num_dimensions = ackley.dimensions
     num_ants = 100
     num_iterations = 100
 

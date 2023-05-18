@@ -275,15 +275,15 @@ def direction(p, q, r):
 # ----------- Search Minimum for ackley function -----------
 def tabu_search_ackley(ackley: Ackley.AckleyFunction):
     max_iterations = 100
-    tabu_list = []
-    best_solution = None
-    best_score = float('inf')
-    tabu_list_size = math.sqrt(max_iterations)
     tabu_time = 10
-    neighborhood_size = 100
+    neighborhood_size = 1000
+    tabu_list = []
+    tabu_list_size = math.sqrt(max_iterations)
+    best_solution = None
+    best_score = np.inf
 
     # Chose a random first node
-    first_node_coordinates = [random.uniform(-32.768, 32.768) for i in range(ackley.dimensions)]
+    first_node_coordinates = [random.uniform(ackley.bounds[0], ackley.bounds[1]) for i in range(ackley.dimensions)]
     first_node = Individual.Individual(first_node_coordinates)
     # Add the first node to the solution path
     tabu_list.append([first_node, 0])
@@ -301,22 +301,22 @@ def tabu_search_ackley(ackley: Ackley.AckleyFunction):
             best_solution = next_node
         elif 0 <= abs(score-best_score) <= 1:
             # Chose a random first node
-            first_node_coordinates = [random.uniform(-32.768, 32.768) for i in range(ackley.dimensions)]
+            first_node_coordinates = [random.uniform(ackley.bounds[0], ackley.bounds[1]) for i in range(ackley.dimensions)]
             first_node = Individual.Individual(first_node_coordinates)
-            # Add the first node to the solution path
-            tabu_list.clear()
+            # Reset the tabu list
+            # tabu_list.clear()
             tabu_list.append([first_node, i])
             current_node = first_node
 
         tabu_list = update_tabu_list_ackley(tabu_list, tabu_time, i)
-
+    best_score = ackley.function(best_solution)
     return best_solution, best_score
 
 
 def find_neighborhood(current_node, tabu_list, ackley, neighborhood_size):
     neighborhood = []
     tabu_list_coordinates = [item[0].coordinates for item in tabu_list]
-    sigma = 0.1
+    sigma = 1.7
 
     for i in range(neighborhood_size):
         while True:
@@ -335,7 +335,6 @@ def neighbor_in_tabu(neighbor_coordinates, tabu_list_coordinates):
             if node[i] == neighbor_coordinates[i]:
                 return True
     return False
-
 
 def select_next_node(neighborhood, ackley):
     function_list = [ackley.function(neighbor) for neighbor in neighborhood]

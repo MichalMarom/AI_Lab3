@@ -22,6 +22,7 @@ class AckleyFunction:
         self.minimum = [0 for i in range(self.dimensions)]
         self.solution = 0
         self.score = 0
+        self.bounds = (-32.768, 32.768)
 
     def function(self, point):
         sum_point = sum([point.coordinates[i] ** 2 for i in range(self.dimensions)])
@@ -91,7 +92,8 @@ class AckleyFunction:
         return
 
     def solve_with_Cooperative_PSO(self):
-        self.solution, self.total_score = CooperativePSO.cooperative_pso()
+        self.solution, self.total_score = CooperativePSO.cooperative_pso_ackley(self)
+        print("solution: ", self.solution)
         print("TOTAL SCORE: ", self.total_score)
         return
 

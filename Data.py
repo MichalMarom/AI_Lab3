@@ -12,7 +12,7 @@ inputs_text_algorithm = "Enter the algorithm:\nTabu search = 0\nACO = 1\nSimulat
 
 class Data:
 
-    def __init__(self, setting_vector=None):
+    def __init__(self, setting_vector = None):
         if setting_vector:
             self.init_with_settings(setting_vector)
         else:
@@ -47,10 +47,14 @@ class Data:
         # self.age_factor = setting_vector[8]
         # self.viability_fuc_num = setting_vector[9]
         # self.algorithm = inputs_text_algorithm[10]
+
+
+        self.num_genes = setting_vector
         return
 
     def _init_consts(self):
-        # self.pop_size = 100
-        # self.max_generations = 100
+        self.pop_size = 100
+        self.max_generations = 100
         # self.max_age = 101
+        
         return

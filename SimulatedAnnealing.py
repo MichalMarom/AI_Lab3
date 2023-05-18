@@ -1,12 +1,13 @@
 # ----------- Python Package -----------
 import math
 import random
+from Ackley import AckleyFunction
 
 from Clustering import Cluster
 from Individual import Individual
 
 INITIAL_TEMPERTURE = 100.0
-COOLING_RATE = 0.99
+COOLING_RATE = 0.9
 
 class SimulatedAnnealing:
     temperature: float
@@ -17,10 +18,12 @@ class SimulatedAnnealing:
     score: float
 
     def __init__(self, 
-                 cluster: Cluster,
+                 cluster: Cluster = None,
                  start_point = None, 
                  end_point = None):
         self.temperature = INITIAL_TEMPERTURE
+        self.final_temperature = 1
+        self.iterations_per_temp = 100
         self.cooling_rate = COOLING_RATE
         self.cluster = cluster
         self.solution = []
@@ -32,12 +35,11 @@ class SimulatedAnnealing:
             self.start_point = start_point
         
         if end_point == None:
-            self.end_point = Individual([0,0], 0, len(self.individuals))
+            self.end_point = Individual([0,0], 0, -1)
         else:
             self.end_point = end_point
             self.end_point.index = len(self.cluster.individuals)+1
 
-    
     def euclidean_cost(self, tour: list, points: list, 
                        start_point, end_point):
         total_distance = 0
@@ -131,3 +133,49 @@ class SimulatedAnnealing:
     
     def get_solution_and_socre(self):
         return self.solution, self.score
+    
+    def solve_ackley(self, ackley: AckleyFunction):
+        # Initialize the current solution randomly within the search space
+        current_solution = [random.uniform(-5, 5) for d in range(ackley.dimensions)]
+        current_fitness = ackley.function_coord(current_solution)
+
+        # Initialize the best solution as the current solution
+        best_solution = current_solution
+        best_fitness = current_fitness
+
+        # Initialize the temperature
+        temperature = self.temperature
+
+        # Simulated Annealing main loop
+        while temperature > self.final_temperature:
+            for _ in range(self.iterations_per_temp):
+                # Generate a new neighbor solution
+                neighbor_solution = self.generate_neighbor(current_solution, step_size=1.0)
+
+                # Calculate the fitness of the new solution
+                neighbor_fitness = ackley.function_coord(neighbor_solution)
+
+                # Determine whether to accept the new solution
+                if self.acceptance_probability(current_fitness, neighbor_fitness, temperature) > random.random():
+                    current_solution = neighbor_solution
+                    current_fitness = neighbor_fitness
+
+                # Update the best solution if necessary
+                if neighbor_fitness < best_fitness:
+                    best_solution = neighbor_solution
+                    best_fitness = neighbor_fitness
+
+            # Cool down the temperature
+            temperature *= self.cooling_rate
+
+        return best_solution, best_fitness
+
+        
+    def generate_neighbor(self, solution, step_size):
+        return [xi + random.uniform(-step_size, step_size) for xi in solution]        
+    
+    def acceptance_probability(self, current_fitness, new_fitness, temperature):
+        if new_fitness < current_fitness:
+            return 1.0
+        else:
+            return math.exp((current_fitness - new_fitness) / temperature)

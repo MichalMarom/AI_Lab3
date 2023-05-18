@@ -1,6 +1,7 @@
 # ----------- File Form Lab -----------
+# from Ackley import AckleyFunction
 import Individual
-import Ackley
+# import Ackley
 # ----------- Python Package -----------
 import math
 import random
@@ -273,6 +274,7 @@ def direction(p, q, r):
 
 # --------------------------------------------------------------------------------------------------------
 # ----------- Search Minimum for ackley function -----------
+
 def tabu_search_ackley(ackley: Ackley.AckleyFunction):
     max_iterations = 100
     tabu_time = 10
@@ -303,8 +305,6 @@ def tabu_search_ackley(ackley: Ackley.AckleyFunction):
             # Chose a random first node
             first_node_coordinates = [random.uniform(ackley.bounds[0], ackley.bounds[1]) for i in range(ackley.dimensions)]
             first_node = Individual.Individual(first_node_coordinates)
-            # Reset the tabu list
-            # tabu_list.clear()
             tabu_list.append([first_node, i])
             current_node = first_node
 
@@ -335,6 +335,7 @@ def neighbor_in_tabu(neighbor_coordinates, tabu_list_coordinates):
             if node[i] == neighbor_coordinates[i]:
                 return True
     return False
+
 
 def select_next_node(neighborhood, ackley):
     function_list = [ackley.function(neighbor) for neighbor in neighborhood]

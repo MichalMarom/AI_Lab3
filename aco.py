@@ -6,7 +6,7 @@ import math
 import random
 import numpy as np
 # ----------- Consts Name  ----------
-PHEROMONE = 50  # Amount of pheromone an ant borne with
+PHEROMONE = 200  # Amount of pheromone an ant borne with
 ALPHA = 1   # The importance of the pheromone on the edge in the probabilistic transition
 BETA = 1  # The importance of the length of the edge in the probabilistic transition
 RHO = 0.5  # The trail persistence or evaporation rate
@@ -220,8 +220,6 @@ def update_edges(matrix_edges, individuals, increasing_explortion: bool):
     for i_ind in individuals:
         for j_ind in individuals:
             if i_ind.index != j_ind.index:
-                # if increasing_explortion and matrix_edges[i_ind.index][j_ind.index].tau < 10:
-                #     matrix_edges[i_ind.index][j_ind.index].tau *= 10
                 if increasing_explortion:
                     matrix_edges[i_ind.index][j_ind.index].tau = 0.1
                 else:
@@ -233,48 +231,6 @@ def update_edges(matrix_edges, individuals, increasing_explortion: bool):
 
 # ----------- Search Minimum for ackley function -----------
 def aco_algo_ackley(ackley):
-    # max_iterations = 100
-    # num_ants = 100
-    # global ALPHA
-    # global BETA
-    # global RHO
-    # global PHEROMONE
-    #
-    # # Initialize the best solution and best fitness
-    # best_solution = None
-    # best_fitness = float('inf')
-    # ants = []
-    #
-    # # Initialize the ants
-    # for i in range(num_ants):
-    #     ant_coordinates = [random.uniform(-32.768, 32.768) for i in range(ackley.dimensions)]
-    #     ant = Individual.Individual(ant_coordinates)
-    #     ants.append(ant)
-    #
-    # matrix_edges = init_matrix_edges(ants, ackley.minimum)
-    #
-    # # Loop through the iterations
-    # for iteration in range(max_iterations):
-    #     next_nodes_score = []
-    #     next_ants_position = []
-    #     next_edges = []
-    #     for i, ant in enumerate(ants):
-    #         next_node, next_edge = select_next_node(i, matrix_edges)
-    #         next_nodes_score.append(ackley.function(next_node))
-    #         next_ants_position.append(next_node)
-    #         next_edges.append(next_edge)
-    #
-    #     best_ant_score = min(next_nodes_score)
-    #     if best_ant_score < best_fitness:
-    #         best_fitness = best_ant_score
-    #         best_solution = next_ants_position[next_nodes_score.index(best_ant_score)]
-    #
-    #     ants = [node for node in next_ants_position]
-    #     for edge in next_edges:
-    #         edge.update_tau()
-    #
-    # return best_solution, best_fitness
-
     # Determine the dimensionality of the problem (Ackley is 30-dimensional)
     num_dimensions = ackley.dimensions
     num_ants = 100
@@ -341,9 +297,6 @@ def aco_algo_ackley(ackley):
                 if ant_fitness < ant_best_fitnesses[ant]:
                     ant_best_positions[ant][dimension] = ant_positions[ant][dimension]
                     ant_best_fitnesses[ant] = ant_fitness
-                # elif ant_fitness == ant_best_fitnesses[ant]:
-                #     # Evaporate pheromone globally
-                #     pheromone_matrix[dimension] *= (1.0 - RHO)
 
             # Update the pheromone matrix based on the ant's best position
             for dimension in range(num_dimensions):
@@ -385,30 +338,3 @@ def select_next_node(ant_index, matrix_edges):
     next_node = next_edge.nodes[1]
 
     return [next_node, next_edge]
-
-
-# Initialize the edges matrix for a cluster
-def init_matrix_edges(ants, minimum):
-    matrix_size = len(ants) + 1
-    minimum_point = Individual.Individual(minimum)
-    matrix_edges = []
-
-    # Create List of list
-    for i in range(matrix_size):
-        matrix_edges.append([])
-        for j in range(matrix_size):
-            matrix_edges[i].append(None)
-
-    for i, i_ant in enumerate(ants):
-        for j, j_ant in enumerate(ants):
-            if i != j:
-                nodes = [i_ant, j_ant]
-                matrix_edges[i][j] = Edge(nodes)
-
-    for i, i_ant in enumerate(ants):
-        nodes = [minimum_point, i_ant]
-        matrix_edges[matrix_size-1][i] = Edge(nodes)
-        nodes = [i_ant, minimum_point]
-        matrix_edges[i][matrix_size-1] = Edge(nodes)
-
-    return matrix_edges

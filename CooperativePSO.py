@@ -5,19 +5,8 @@ import Ackley
 import random
 import numpy as np
 # ----------- Consts Parameters -----------
-MAX_TRY = 100
+MAX_ITERATIONS = 100
 
-
-# class SubSwarm:
-#     nodes: list
-#     particles: list
-#     path_solution: list
-#     path_score: float
-#     cognitive_memory: list
-#     social_memory: list
-#
-#     def __int__(self, nodes):
-#         self.nodes = nodes
 
 def cooperative_pso(clusters, start_point):
     best_score = []
@@ -30,8 +19,8 @@ def cooperative_pso(clusters, start_point):
         global_best = min(particles, key=lambda x: x.score)
         c1, c2, w = 0, 0, 0
 
-        for iteration in range(MAX_TRY):
-            c1, c2, w = update_parameters(c1, c2, w, MAX_TRY, iteration)
+        for iteration in range(MAX_ITERATIONS):
+            c1, c2, w = update_parameters(c1, c2, w, MAX_ITERATIONS, iteration)
 
             for particle in particles:
                 particle.update(global_best, c1, c2, w, start_point)
@@ -129,8 +118,8 @@ def cooperative_pso_ackley(ackley):
     global_best = min(particles, key=lambda x: x.score)
     c1, c2, w = 0, 0, 0
 
-    for iteration in range(MAX_TRY):
-        c1, c2, w = update_parameters(c1, c2, w, MAX_TRY, iteration)
+    for iteration in range(MAX_ITERATIONS):
+        c1, c2, w = update_parameters(c1, c2, w, MAX_ITERATIONS, iteration)
 
         for particle in particles:
             particle.update(global_best, c1, c2, w, ackley)

@@ -6,10 +6,10 @@ import CooperativePSO
 # ----------- Python Package -----------
 import numpy as np
 # ----------- Consts Name  -----------
-Tabu_search = 0
+TABU_SEARCH = 0
 ACO = 1
-Simulated_Annealing = 2
-GA = 3
+SIMULATED_ANNEALING = 2
+ISLANDS = 3
 Cooperative_PSO = 4
 
 
@@ -49,35 +49,37 @@ class AckleyFunction:
         return dist
 
     def find_minimum(self, algorithm_type):
-        if algorithm_type == Tabu_search:
+        if algorithm_type == TABU_SEARCH:
             self.solve_with_tabu_search()
 
         elif algorithm_type == ACO:
             self.solve_with_aco()
 
-        elif algorithm_type == Simulated_Annealing:
+        elif algorithm_type == SIMULATED_ANNEALING:
             self.solve_with_simulated_anealing()
 
-        #elif algorithm_type == GA:
-            # self.solve_with_Cooperative_PSO()
+        elif algorithm_type == ISLANDS:
+            self.solve_with_islands_genetic_algo()
 
         elif algorithm_type == Cooperative_PSO:
             self.solve_with_Cooperative_PSO()
 
     def solve_with_tabu_search(self):
+        print("----- Tabu Search -----")
         self.solution, self.score = TabuSearch.tabu_search_ackley(self)
         print("solution: ", self.solution.coordinates)
         print("TOTAL SCORE: ", self.score)
         return
 
     def solve_with_aco(self):
+        print("----- ACO -----")
         self.solution, self.score = aco.aco_algo_ackley(self)
         print("solution: ", self.solution)
         print("TOTAL SCORE: ", self.score)
         return
 
     def solve_with_simulated_anealing(self):
-
+        print("----- Simulated Anealing -----")
         # for cluster in self.clusters:
         #     simulated_annealing_instance = SimulatedAnnealing.SimulatedAnnealing(cluster,
         #                                                                          self.start_point,
@@ -96,9 +98,46 @@ class AckleyFunction:
         return
 
     def solve_with_Cooperative_PSO(self):
+        print("----- PSO -----")
         self.solution, self.total_score = CooperativePSO.cooperative_pso_ackley(self)
         print("solution: ", self.solution)
         print("TOTAL SCORE: ", self.total_score)
+        return
+
+    def solve_with_islands_genetic_algo(self):
+        self.total_score = 0
+        self.solution = []
+
+        # Initialize the cvrp for the current island
+        for i, cluster in enumerate(self.clusters):
+            self.islands.append(Population.Population(cluster, self.start_point, self.end_point))
+
+        # Create and start threads for each island
+        threads = []
+        for i, island in enumerate(self.islands):
+            thread = threading.Thread(target=self.islands[i].genetic_algorithm,
+                                      args=())
+            threads.append(thread)
+
+        for thread in threads:
+            thread.start()
+
+        # Wait for all threads to finish
+        for thread in threads:
+            thread.join()
+
+        for i, island in enumerate(self.islands):
+            self.solution.append(self.islands[i].get_solution())
+            self.total_score += island.best_fitness
+
+        # for path in self.solution:
+        #     print("----------------")
+        #     for point in path:
+        #         print(point.index)
+
+        print("----- Islands Genetic -----")
+        print("TOTAL SCORE: ", int(self.total_score))
+
         return
 
 

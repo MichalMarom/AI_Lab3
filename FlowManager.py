@@ -43,7 +43,7 @@ class FlowManager:
     def run_multi_thread_CVRP_solution(self):
         # Create and start threads for each algorithm
         threads = []
-        # creat cluster of nodes for each track
+        # Create cluster of nodes for each track
         self.cvrp.create_clusters()
         for i in range(5):
             thread = threading.Thread(target=self.solve_CVRP(i))

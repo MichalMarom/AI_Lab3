@@ -12,19 +12,15 @@ import Population
 import random
 import math
 import matplotlib.pyplot as plt
-# ----------- Consts Parameters -----------
+import time
 # ----------- Consts Name  -----------
-Tabu_search = 0
+TABU_SEARCH = 0
 ACO = 1
-Simulated_Annealing = 2
-GA = 3
-Cooperative_PSO = 4
-MAX_TRY = 5
-MAX_TRY_CLUSTER = 100
-
-TABU_SEARCH = 1
 SIMULATED_ANNEALING = 2
 ISLANDS = 3
+Cooperative_PSO = 4
+MAX_ATTEMPT = 2
+MAX_ATTEMPT_CLUSTER = 100
 
 
 class CVRP:
@@ -46,13 +42,12 @@ class CVRP:
     def __init__(self, setting_vector=None):
         self.data = Data.Data(setting_vector)
         self.individuals = []
-        # self.start_point = Individual.Individual([0,0], 0, 0)
-        # self.end_point = Individual.Individual([0,0], 0, len(self.individuals))
         self.clusters = []
         self.islands = []
         self.total_score = 0
         self.solution = []
         self.read_problem_file()
+        self.total_time = 0
 
     def read_problem_file(self):
         with open("CVRP_inputs/cvpr_test1.txt") as f:
@@ -119,7 +114,7 @@ class CVRP:
             print("=================================")
         return
 
-    def print_graph(self):
+    def print_graph(self, algorithm_type):
         x_values = []
         y_values = []
         for point in self.individuals:
@@ -134,6 +129,9 @@ class CVRP:
         y1 = []
         colors = []
         ax = plt.axes()
+        algorithm_name = self.algorithm_name_by_number(algorithm_type)
+        plt.suptitle(algorithm_name)
+        plt.title(f"Score:{int(self.total_score)}, Time:{round(self.total_time, 4)} sec")
         ax.set(xlim=(min_value_x, max_value_x),
                ylim=(min_value_y, max_value_y),
                xlabel='X',
@@ -162,46 +160,36 @@ class CVRP:
         plt.show()
         return
 
+    def algorithm_name_by_number(self, algorithm_type):
+        if TABU_SEARCH == algorithm_type:
+            return "TABU SEARCH"
+        elif ACO == algorithm_type:
+            return "ACO"
+        elif SIMULATED_ANNEALING == algorithm_type:
+            return "SIMULATED ANNEALING"
+        elif ISLANDS == algorithm_type:
+            return "GENETIC ALGO WITH ISLANDS"
+        elif Cooperative_PSO == algorithm_type:
+            return "Cooperative PSO"
+
     def create_clusters(self):
-
-        # ------ Clustring with best fit - by weight ------
-        # clusters = Clustering.best_fit(self.individuals, self.max_capacity)
-        # for i in range(len(clusters)):
-        #     self.clusters.append(Clustering.Cluster(clusters[i]))
-        # clusters = Clustering.best_fit(self.individuals, self.max_capacity)
-        # for i in range(len(clusters)):
-        #     self.clusters.append(Clustering.Cluster(clusters[i]))
-
-        # ------ Clustring KNN - by dist ------
-        # clusters_centers, clusters = Clustering.clustering(self.individuals, self.trucks_number)
-        # for i in range(len(clusters)):
-        #     self.clusters.append(Clustering.Cluster(clusters[i], clusters_centers[i]))
-        #
-        # while True:
-        #     clusters_valid_check = [cluster.sum_demands > self.max_capacity for cluster in self.clusters]
-        #     print(clusters_valid_check)
-        #     if True not in clusters_valid_check:
-        #         break
-        #     elif True in clusters_valid_check:
-        #         self.fix_cluster_weight()
         silhouette_per_try = []
-        inertia_per_try = []
         clusters_per_try = []
-        for i in range(MAX_TRY_CLUSTER):
+        for i in range(MAX_ATTEMPT_CLUSTER):
             while True:
-                trys = 0
+                attempt = 0
                 self.clusters = []
                 clusters_centers, clusters = Clustering.clustering(self.individuals, self.trucks_number)
-                for i in range(len(clusters)):
-                    self.clusters.append(Clustering.Cluster(clusters[i], clusters_centers[i]))
+                for j in range(len(clusters)):
+                    self.clusters.append(Clustering.Cluster(clusters[j], clusters_centers[j]))
 
-                while trys < MAX_TRY:
+                while attempt < MAX_ATTEMPT:
                     clusters_valid_check = [cluster.sum_demands > self.max_capacity for cluster in self.clusters]
                     if True not in clusters_valid_check:
                         break
                     elif True in clusters_valid_check:
                         self.fix_cluster_weight()
-                        trys += 1
+                        attempt += 1
                 else:
                     continue
                 break
@@ -209,8 +197,6 @@ class CVRP:
             clusters_centers = [cluster.center for cluster in self.clusters]
             silhouette_score = Clustering.silhouette(clusters_centers, self.clusters)
             silhouette_per_try.append(silhouette_score)
-            inertia_score = Clustering. inertia(clusters_centers, self.clusters)
-            inertia_per_try.append(inertia_score)
             clusters_per_try.append(self.clusters)
 
         self.clusters = Clustering.find_best_cluster(clusters_per_try, silhouette_per_try)
@@ -218,37 +204,11 @@ class CVRP:
 
     def fix_cluster_weight(self):
         for index, cluster in enumerate(self.clusters):
-            # print("AT INDEX:", index)
             if cluster.sum_demands > self.max_capacity:
                 self.balance_cluster_weight(cluster, index)
         return  
 
     def balance_cluster_weight(self, cluster, cluster_index):
-
-        # ------ balance with: Dist + weight ------
-        # if cluster_index == len(self.clusters)-1:
-        #     dist = [math.dist(cluster.center.coordinates, self.clusters[i].center.coordinates) for i in range(len(self.clusters)-1)]
-        #     weight = [self.clusters[i].sum_demands for i in range(len(self.clusters) - 1)]
-        #     clusters_score = [dist[i] + weight[i] for i in range(len(self.clusters) - 1)]
-        #     # print("len dist:", len(dist))
-        #     min_centers = []
-        #     for i in range(len(clusters_score)):
-        #         if clusters_score[i] == min(clusters_score):
-        #             min_centers.append(self.clusters[i])
-        #     closest_cluster = random.sample(min_centers, 1)[0]
-        #
-        #
-        # else:
-        #     dist = [math.dist(cluster.center.coordinates, self.clusters[i].center.coordinates) for i in range(cluster_index+1, len(self.clusters))]
-        #     weight = [self.clusters[i].sum_demands for i in range(cluster_index+1, len(self.clusters))]
-        #     clusters_score = [dist[i] + weight[i] for i in range(len(dist))]
-        #     # print("len dist:", len(dist))
-        #     min_centers = []
-        #     for i in range(len(clusters_score)):
-        #         if clusters_score[i] == min(clusters_score):
-        #             min_centers.append(self.clusters[i + cluster_index + 1])
-        #     closest_cluster = random.sample(min_centers, 1)[0]
-
         # ------ balance with: Dist + weight, with circles ------
         dist = [math.dist(cluster.center.coordinates, self.clusters[i].center.coordinates) for i in range(len(self.clusters))]
         weight = [self.clusters[i].sum_demands for i in range(len(self.clusters))]
@@ -259,36 +219,13 @@ class CVRP:
                 min_centers.append(self.clusters[i])
         closest_cluster = random.sample(min_centers, 1)[0]
 
-        # ------ balance with: Dist only ------
-        # For the last cluster lets choose according to weight or Dist
-        # if cluster_index == len(self.clusters)-1:
-        #     dist = [math.dist(cluster.center.coordinates, self.clusters[i].center.coordinates) for i in range(len(self.clusters)-1)]
-        #     weight = [self.clusters[i].sum_demands for i in range(len(self.clusters) - 1)]
-        #     # print("len dist:", len(dist))
-        #     min_dist_centers = []
-        #     for i in range(len(dist)):
-        #         if dist[i] == min(dist):
-        #             min_dist_centers.append(self.clusters[i])
-        #     closest_cluster = random.sample(min_dist_centers, 1)[0]
-        #
-        # else:
-        #     dist = [math.dist(cluster.center.coordinates, self.clusters[i].center.coordinates) for i in range(cluster_index+1, len(self.clusters))]
-        #     # print("len dist:", len(dist))
-        #     min_dist_centers = []
-        #     for i in range(len(dist)):
-        #         if dist[i] == min(dist):
-        #             min_dist_centers.append(self.clusters[i + cluster_index + 1])
-        #     closest_cluster = random.sample(min_dist_centers, 1)[0]
-
         while cluster.sum_demands > self.max_capacity:
             nearest_individual = self.find_nearest_individual(closest_cluster, cluster)
             # Removing the nearest individual from cluster and updating sum_demands
             cluster.removing_individual(nearest_individual)
-
             # Adding the nearest individual to the closest cluster and updating sum_demands
             closest_cluster.adding_individual(nearest_individual)
 
-        # print("finish!")
         return
 
     def find_nearest_individual(self, closest_cluster, cluster):
@@ -297,16 +234,16 @@ class CVRP:
         return cluster.individuals[nearest_individual_index]
 
     def solve_clustrers_TSP(self, algorithm_type):
-        if algorithm_type == Tabu_search:
+        if algorithm_type == TABU_SEARCH:
             self.solve_with_tabu_search()
 
         elif algorithm_type == ACO:
             self.solve_with_aco()
 
-        elif algorithm_type == Simulated_Annealing:
+        elif algorithm_type == SIMULATED_ANNEALING:
             self.solve_with_simulated_anealing()
 
-        elif algorithm_type == GA:
+        elif algorithm_type == ISLANDS:
             self.solve_with_islands_genetic_algo()
 
         elif algorithm_type == Cooperative_PSO:
@@ -315,17 +252,25 @@ class CVRP:
         return
 
     def solve_with_tabu_search(self):
+        start_time = time.time()
         self.solution, self.total_score = TabuSearch.tabu_search(self.clusters, self.start_point)
+        print("----- Tabu Search -----")
         print("TOTAL SCORE: ", self.total_score)
+        self.total_time = time.time() - start_time
         return
 
     def solve_with_aco(self):
+        start_time = time.time()
         self.solution, self.total_score = aco.aco_algo(self.clusters, self.start_point)
+        print("----- ACO -----")
         print("TOTAL SCORE: ", self.total_score)
+        self.total_time = time.time() - start_time
         return
 
     def solve_with_simulated_anealing(self):
-
+        start_time = time.time()
+        self.total_score = 0
+        self.solution = []
         for cluster in self.clusters:
             simulated_annealing_instance = SimulatedAnnealing.SimulatedAnnealing(cluster,
                                                                                  self.start_point,
@@ -339,16 +284,25 @@ class CVRP:
         #     print("----------------")
         #     for point in path:
         #         print(point.index)
+        print("----- Simulated Anealing -----")
         print("TOTAL SCORE: ", int(self.total_score))
+        self.total_time = time.time() - start_time
 
         return
 
     def solve_with_Cooperative_PSO(self):
+        start_time = time.time()
         self.solution, self.total_score = CooperativePSO.cooperative_pso(self.clusters, self.start_point)
+        print("----- PSO -----")
         print("TOTAL SCORE: ", self.total_score)
+        self.total_time = time.time() - start_time
         return
     
     def solve_with_islands_genetic_algo(self):
+        start_time = time.time()
+        self.total_score = 0
+        self.solution = []
+
         # Initialize the cvrp for the current island
         for i, cluster in enumerate(self.clusters):
             self.islands.append(Population.Population(cluster, self.start_point, self.end_point))
@@ -356,7 +310,7 @@ class CVRP:
         # Create and start threads for each island
         threads = []
         for i, island in enumerate(self.islands):
-            thread = threading.Thread(target = self.islands[i].genetic_algorithm, 
+            thread = threading.Thread(target=self.islands[i].genetic_algorithm,
                                       args=())
             threads.append(thread)
         
@@ -371,12 +325,14 @@ class CVRP:
             self.solution.append(self.islands[i].get_solution())
             self.total_score += island.best_fitness
 
-        for path in self.solution:
-            print("----------------")
-            for point in path:
-                print(point.index)
+        # for path in self.solution:
+        #     print("----------------")
+        #     for point in path:
+        #         print(point.index)
 
+        print("----- Islands Genetic -----")
         print("TOTAL SCORE: ", int(self.total_score))
+        self.total_time = time.time() - start_time
 
         return
 

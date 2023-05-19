@@ -78,8 +78,8 @@ class Population:
             new_average, new_variance, new_sd = self.average_fitness(self.fitnesses)
 
             gen_time = time.time()
-            print(f"========================================= {generation_index}")
-            print(f"Average for this gen is {new_average}")
+            # print(f"========================================= {generation_index}")
+            # print(f"Average for this gen is {new_average}")
 
             # Select the best individuals for reproduction
             elite_size = int(self.data.pop_size * ELITE_PERCENTAGE)

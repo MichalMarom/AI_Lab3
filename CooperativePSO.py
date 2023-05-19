@@ -1,22 +1,12 @@
 # ----------- File Form Lab -----------
 import Individual
+import Ackley
 # ----------- Python Package -----------
 import random
 import numpy as np
 # ----------- Consts Parameters -----------
-MAX_TRY = 100
+MAX_ITERATIONS = 100
 
-
-# class SubSwarm:
-#     nodes: list
-#     particles: list
-#     path_solution: list
-#     path_score: float
-#     cognitive_memory: list
-#     social_memory: list
-#
-#     def __int__(self, nodes):
-#         self.nodes = nodes
 
 def cooperative_pso(clusters, start_point):
     best_score = []
@@ -29,8 +19,8 @@ def cooperative_pso(clusters, start_point):
         global_best = min(particles, key=lambda x: x.score)
         c1, c2, w = 0, 0, 0
 
-        for iteration in range(MAX_TRY):
-            c1, c2, w = update_parameters(c1, c2, w, MAX_TRY, iteration)
+        for iteration in range(MAX_ITERATIONS):
+            c1, c2, w = update_parameters(c1, c2, w, MAX_ITERATIONS, iteration)
 
             for particle in particles:
                 particle.update(global_best, c1, c2, w, start_point)
@@ -88,8 +78,7 @@ class Particle:
         return individuals
 
     def update(self, global_best, c1, c2, w, start_point):
-        # print("BEFOR:", self.position)
-        # print("SCORE:", self.score)
+
         self.velocity = w * self.velocity + \
                         c1 * random.random() * (self.personal_best - self.position) +\
                         c2 * random.random() * (global_best.position - self.position)
@@ -98,8 +87,6 @@ class Particle:
         new_position_sorted = np.argsort(new_position)
         new_position_adjusted = [self.position[new_position_sorted[i]] for i in range(len(new_position_sorted))]
         self.position = np.array(new_position_adjusted)
-
-        # print("AFTER:", self.position)
 
         self.position_individuals = self.update_position_individuals()
         self.score = self.objective_function(start_point)
@@ -120,4 +107,65 @@ class Particle:
         return distance
 
 
+# --------------------------------------------------------------------------------------------------------
+# ----------- Search Minimum for ackley function -----------
+def cooperative_pso_ackley(ackley):
+    best_score = 0
+    best_solution = None
+    num_particle = 1000
+
+    particles = [ParticleAckley(ackley) for i in range(num_particle)]
+    global_best = min(particles, key=lambda x: x.score)
+    c1, c2, w = 0, 0, 0
+
+    for iteration in range(MAX_ITERATIONS):
+        c1, c2, w = update_parameters(c1, c2, w, MAX_ITERATIONS, iteration)
+
+        for particle in particles:
+            particle.update(global_best, c1, c2, w, ackley)
+
+        best_particle = min(particles, key=lambda x: x.personal_best_score)
+
+        if best_particle.personal_best_score < global_best.score:
+            best_particle.position = best_particle.personal_best
+            best_particle.score = best_particle.personal_best_score
+            global_best = best_particle
+
+        best_solution = global_best.position
+        best_score = ackley.function_coord(best_solution)
+
+    return best_solution, best_score
+
+
+class ParticleAckley:
+    position: list
+    nodes: list
+    personal_best: list
+    personal_best_score: float
+    score: float
+
+    def __init__(self, ackley):
+        self.position = np.array([random.uniform(ackley.bounds[0], ackley.bounds[1]) for i in range(ackley.dimensions)])
+        self.velocity = np.zeros(ackley.dimensions)
+        self.score = ackley.function_coord(self.position)
+        self.personal_best = self.position.copy()
+        self.personal_best_score = self.score
+
+        return
+
+    def update(self, global_best, c1, c2, w, ackley):
+
+        self.velocity = w * self.velocity + \
+                        c1 * random.random() * (self.personal_best - self.position) +\
+                        c2 * random.random() * (global_best.position - self.position)
+
+        self.position = self.position + self.velocity
+        # self.position = np.clip(self.position, ackley.bounds[0], ackley.bounds[1])
+        self.score = ackley.function_coord(self.position)
+
+        if self.score < self.personal_best_score:
+            self.personal_best = self.position.copy()
+            self.personal_best_score = self.score
+
+        return
 

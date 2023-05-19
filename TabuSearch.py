@@ -1,7 +1,5 @@
 # ----------- File Form Lab -----------
-# from Ackley import AckleyFunction
 import Individual
-# import Ackley
 # ----------- Python Package -----------
 import math
 import random
@@ -69,8 +67,6 @@ def tabu_search(clusters, start_point):
 
 # Finding the path and returns the nodes and edges
 def find_path(solution_path, solution_edges, individuals, update_individuals):
-
-    #while len(solution_path) < len(individuals) - 1:
     while len(update_individuals) > 1:
         diff = len(individuals)+1 - len(solution_path)
         current_node = solution_path[len(solution_path)-1]
@@ -115,13 +111,11 @@ def add_last_edge(solution_path, solution_edges, start_point):
         solution_path, solution_edges = fix_path_to_start(solution_path, solution_edges)
         # if not solution_path:
         #     return [], []
-
         last_node = solution_path[len(solution_path) - 1]
         last_edge = Edge([last_node, start_point])
         # for edge_path in solution_edges:
         #     if lines_intersect(edge_path, last_edge):
         #         return [], []
-
         solution_path.append(start_point)
         solution_edges.append(last_edge)
         return solution_path, solution_edges
@@ -136,11 +130,9 @@ def fix_path_to_start(circle_path, solution_edges):
     nodes_index = [node.index for node in circle_path]
     start_index = nodes_index.index(0)
     path = circle_path[start_index:] + circle_path[:start_index]
-
     # for edge_path in solution_edges:
     #     if lines_intersect(edge_path, first_edge):
     #         return [], []
-
     solution_edges.append(first_edge)
     return path, solution_edges
 
@@ -261,7 +253,7 @@ def lines_intersect(edge_1, edge_2):
     d4 = direction(a2, b2, b1)
 
     # Check if the two line segments intersect
-    if (d1 > 0 > d2 or d1 < 0 < d2)  and (d3 > 0 > d4 or d3 < 0 < d4):
+    if (d1 > 0 > d2 or d1 < 0 < d2) and (d3 > 0 > d4 or d3 < 0 < d4):
         return True
 
     return False
@@ -274,50 +266,49 @@ def direction(p, q, r):
 
 # --------------------------------------------------------------------------------------------------------
 # ----------- Search Minimum for ackley function -----------
-# def tabu_search_ackley(ackley: Ackley.AckleyFunction):
-#     max_iterations = 100
-#     tabu_list = []
-#     best_solution = None
-#     best_score = float('inf')
-#     tabu_list_size = math.sqrt(max_iterations)
-#     tabu_time = 10
-#     neighborhood_size = 100
 
-#     # Chose a random first node
-#     first_node_coordinates = [random.uniform(-32.768, 32.768) for i in range(ackley.dimensions)]
-#     first_node = Individual.Individual(first_node_coordinates)
-#     # Add the first node to the solution path
-#     tabu_list.append([first_node, 0])
-#     current_node = first_node
+def tabu_search_ackley(ackley):
+    max_iterations = 100
+    tabu_time = 10
+    neighborhood_size = 1000
+    tabu_list = []
+    tabu_list_size = math.sqrt(max_iterations)
+    best_solution = None
+    best_score = np.inf
 
-#     for i in range(max_iterations):
-#         neighborhood = find_neighborhood(current_node, tabu_list, ackley, neighborhood_size)
-#         next_node = select_next_node(neighborhood, ackley)
-#         score = ackley.function(next_node)
-#         tabu_list = add_node_tabu_list(tabu_list, tabu_list_size, next_node, i)
-#         current_node = next_node
+    # Chose a random first node
+    first_node_coordinates = [random.uniform(ackley.bounds[0], ackley.bounds[1]) for i in range(ackley.dimensions)]
+    first_node = Individual.Individual(first_node_coordinates)
+    # Add the first node to the solution path
+    tabu_list.append([first_node, 0])
+    current_node = first_node
 
-#         if score < best_score:
-#             best_score = score
-#             best_solution = next_node
-#         elif 0 <= abs(score-best_score) <= 1:
-#             # Chose a random first node
-#             first_node_coordinates = [random.uniform(-32.768, 32.768) for i in range(ackley.dimensions)]
-#             first_node = Individual.Individual(first_node_coordinates)
-#             # Add the first node to the solution path
-#             tabu_list.clear()
-#             tabu_list.append([first_node, i])
-#             current_node = first_node
+    for i in range(max_iterations):
+        neighborhood = find_neighborhood(current_node, tabu_list, ackley, neighborhood_size)
+        next_node = select_next_node(neighborhood, ackley)
+        score = ackley.function(next_node)
+        tabu_list = add_node_tabu_list(tabu_list, tabu_list_size, next_node, i)
+        current_node = next_node
 
-#         tabu_list = update_tabu_list_ackley(tabu_list, tabu_time, i)
+        if score < best_score:
+            best_score = score
+            best_solution = next_node
+        elif 0 <= abs(score-best_score) <= 1:
+            # Chose a random first node
+            first_node_coordinates = [random.uniform(ackley.bounds[0], ackley.bounds[1]) for i in range(ackley.dimensions)]
+            first_node = Individual.Individual(first_node_coordinates)
+            tabu_list.append([first_node, i])
+            current_node = first_node
 
-#     return best_solution, best_score
+        tabu_list = update_tabu_list_ackley(tabu_list, tabu_time, i)
+    best_score = ackley.function(best_solution)
+    return best_solution, best_score
 
 
 def find_neighborhood(current_node, tabu_list, ackley, neighborhood_size):
     neighborhood = []
     tabu_list_coordinates = [item[0].coordinates for item in tabu_list]
-    sigma = 0.1
+    sigma = 1.7
 
     for i in range(neighborhood_size):
         while True:

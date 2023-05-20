@@ -253,18 +253,20 @@ class CVRP:
 
     def solve_with_tabu_search(self):
         start_time = time.time()
-        self.solution, self.total_score = TabuSearch.tabu_search(self.clusters, self.start_point)
+        self.solution, self.total_score, scores = TabuSearch.tabu_search(self.clusters, self.start_point)
         print("----- Tabu Search -----")
         print("TOTAL SCORE: ", self.total_score)
         self.total_time = time.time() - start_time
+        self.show_scores(scores, "Tabu Search scores")
         return
 
     def solve_with_aco(self):
         start_time = time.time()
-        self.solution, self.total_score = aco.aco_algo(self.clusters, self.start_point)
+        self.solution, self.total_score, scores = aco.aco_algo(self.clusters, self.start_point)
         print("----- ACO -----")
         print("TOTAL SCORE: ", self.total_score)
         self.total_time = time.time() - start_time
+        self.show_scores(scores, "ACO scores")
         return
 
     def solve_with_simulated_anealing(self):
@@ -287,15 +289,15 @@ class CVRP:
         print("----- Simulated Anealing -----")
         print("TOTAL SCORE: ", int(self.total_score))
         self.total_time = time.time() - start_time
-
         return
 
     def solve_with_Cooperative_PSO(self):
         start_time = time.time()
-        self.solution, self.total_score = CooperativePSO.cooperative_pso(self.clusters, self.start_point)
+        self.solution, self.total_score, scores = CooperativePSO.cooperative_pso(self.clusters, self.start_point)
         print("----- PSO -----")
         print("TOTAL SCORE: ", self.total_score)
         self.total_time = time.time() - start_time
+        self.show_scores(scores, "Cooperative PSO Scores")
         return
     
     def solve_with_islands_genetic_algo(self):
@@ -334,6 +336,24 @@ class CVRP:
         print("TOTAL SCORE: ", int(self.total_score))
         self.total_time = time.time() - start_time
 
+        return
+
+    def show_scores(self, scores, title):
+        ax = plt.axes()
+        min_value_y = min(scores)
+        max_value_y = max(scores)
+        plt.title(title)
+        ax.set(xlim=(0, len(scores)),
+               ylim=(min_value_y, max_value_y),
+               xlabel='iteration',
+               ylabel='Score')
+        x1 = []
+        y1 = []
+        for i in range(len(scores)):
+            x1.append(i)
+            y1.append(scores[i])
+        plt.plot(x1, y1)
+        plt.show()
         return
 
 

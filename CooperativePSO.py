@@ -4,6 +4,7 @@ import Ackley
 # ----------- Python Package -----------
 import random
 import numpy as np
+from matplotlib import pyplot as plt
 # ----------- Consts Parameters -----------
 MAX_ITERATIONS = 100
 
@@ -11,6 +12,7 @@ MAX_ITERATIONS = 100
 def cooperative_pso(clusters, start_point):
     best_score = []
     best_solution = []
+    scores = [0 for iteration in range(MAX_ITERATIONS)]
 
     for cluster in clusters:
         individuals_index = [ind.index for ind in cluster.individuals]
@@ -33,11 +35,14 @@ def cooperative_pso(clusters, start_point):
                 best_particle.score = best_particle.personal_best_score
                 global_best = best_particle
 
+            if global_best.score != float('inf'):
+                scores[iteration] += global_best.score
+
         global_best.position_individuals = [start_point] + global_best.position_individuals + [start_point]
         best_solution.append(global_best.position_individuals)
         best_score.append(global_best.score)
 
-    return best_solution, sum(best_score)
+    return best_solution, sum(best_score), scores
 
 
 def update_parameters(c1, c2, w, num_iterations, iteration):
@@ -105,7 +110,6 @@ class Particle:
         distance += self.position_individuals[len(self.position)-1].distance_func(start_point)
 
         return distance
-
 
 # --------------------------------------------------------------------------------------------------------
 # ----------- Search Minimum for ackley function -----------

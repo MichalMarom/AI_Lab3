@@ -5,6 +5,7 @@ import Ackley
 import math
 import random
 import numpy as np
+from matplotlib import pyplot as plt
 # ----------- Consts Name  ----------
 PHEROMONE = 200  # Amount of pheromone an ant borne with
 ALPHA = 1   # The importance of the pheromone on the edge in the probabilistic transition
@@ -114,9 +115,8 @@ class Edge:
 def aco_algo(clusters, start_point):
 
     max_iterations = 100
-    local_min = 0
     old_best_cost = 0
-    num_ants = 5
+    num_ants = 10
     global ALPHA
     global BETA
     global RHO
@@ -125,6 +125,7 @@ def aco_algo(clusters, start_point):
     solution = []
     best_solution = []
     best_score = []
+    scores = []
 
     for i in range(len(clusters)):
         solution.append([])
@@ -166,17 +167,18 @@ def aco_algo(clusters, start_point):
 
         new_best_cost = sum(best_score)
         if old_best_cost == new_best_cost:
-            local_min += 1
-            if local_min == 4:
-                update_edges(matrix_edges, clusters[i].individuals, increasing_explortion=True)
-                local_min = 0
-
+            BETA += 1
+        else:
+            ALPHA += 1
         old_best_cost = new_best_cost
 
         for i, matrix_edges in enumerate(matrix_clusters_edges):
             update_edges(matrix_edges, clusters[i].individuals,  increasing_explortion=False)
 
-    return best_solution, sum(best_score)
+        if sum(best_score) != float('inf'):
+            scores.append(sum(best_score))
+
+    return best_solution, sum(best_score), scores
 
 
 # Initialize the edges matrix for a cluster
@@ -221,20 +223,19 @@ def update_edges(matrix_edges, individuals, increasing_explortion: bool):
         for j_ind in individuals:
             if i_ind.index != j_ind.index:
                 if increasing_explortion:
-                    matrix_edges[i_ind.index][j_ind.index].tau = 0.1
+                    matrix_edges[i_ind.index][j_ind.index].tau *= 0.1
                 else:
                     matrix_edges[i_ind.index][j_ind.index].update_tau()
     return
 
 # --------------------------------------------------------------------------------------------------------
-
-
 # ----------- Search Minimum for ackley function -----------
 def aco_algo_ackley(ackley):
     # Determine the dimensionality of the problem (Ackley is 30-dimensional)
     num_dimensions = ackley.dimensions
     num_ants = 100
     num_iterations = 100
+    scores = []
 
     # Define the bounds for each dimension of the problem (Ackley is bounded between -32.768 and 32.768)
     bounds = (-32.768, 32.768)
@@ -324,6 +325,9 @@ def aco_algo_ackley(ackley):
                                                                 PHEROMONE / ant_best_fitnesses[ant]
                     else:
                         pheromone_matrix[dimension, neighbor] = (1.0 - RHO) * pheromone_matrix[dimension, neighbor]
+
+        if best_fitness != float('inf'):
+            scores.append(best_fitness)
 
     return best_solution, best_fitness
 

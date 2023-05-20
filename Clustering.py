@@ -24,8 +24,6 @@ class Cluster:
         self.sum_demands = self.calc_sum_demands()
         self.score = self.calc_score()
 
-
-
     def calc_sum_demands(self):
         sum_demands = sum([individual.demand for individual in self.individuals])
         return sum_demands
@@ -148,8 +146,6 @@ def find_expectation_center(individuals: list):
 
 def find_nearest_individual(individuals: list, expectation_center):
     dist = [math.dist(individual.coordinates, expectation_center) for individual in individuals]
-    # new_center_index = dist.index(min(dist))
-    # return individuals[new_center_index]
 
     min_dist_individuals = []
     for index, individual in enumerate(individuals):

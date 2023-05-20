@@ -4,6 +4,7 @@ import Individual
 import math
 import random
 import numpy as np
+from matplotlib import pyplot as plt
 
 
 class Edge:
@@ -17,11 +18,12 @@ class Edge:
 
 # ----------- Search path for each cluster -----------
 def tabu_search(clusters, start_point):
-
+    scores = []
     max_iterations = 100
     solution = []
     solution_edges = []
     best_solution = []
+    tabu_time = 1
 
     for i in range(len(clusters)):
         solution.append([])
@@ -48,7 +50,7 @@ def tabu_search(clusters, start_point):
             # Add the start node to the list of the optional nodes
             individuals.append(start_point)
 
-            solution[i], solution_edges[i] = find_path(solution[i], solution_edges[i], cluster.individuals, individuals)
+            solution[i], solution_edges[i] = find_path(solution[i], solution_edges[i], cluster.individuals, individuals, tabu_time)
             solution[i], solution_edges[i] = add_last_edge(solution[i], solution_edges[i], start_point)
 
         for i, cluster in enumerate(clusters):
@@ -56,24 +58,30 @@ def tabu_search(clusters, start_point):
             if score < best_score[i]:
                 best_score[i] = score
                 best_solution[i] = solution[i]
+                tabu_time -= 1
+            if score == best_score[i]:
+                tabu_time += 1
+
+        if sum(best_score) != float('inf'):
+            scores.append(sum(best_score))
 
     for i, solution in enumerate(best_solution):
         score = calc_score(solution)
         best_score[i] = score
         best_solution[i] = solution
 
-    return best_solution, sum(best_score)
+    return best_solution, sum(best_score), scores
 
 
 # Finding the path and returns the nodes and edges
-def find_path(solution_path, solution_edges, individuals, update_individuals):
+def find_path(solution_path, solution_edges, individuals, update_individuals, tabu_time):
     while len(update_individuals) > 1:
         diff = len(individuals)+1 - len(solution_path)
         current_node = solution_path[len(solution_path)-1]
         optional_edges = find_optional_edges(current_node, solution_edges, update_individuals)
         if not optional_edges:
             return [], []
-        next_edge = Local_search_edges(optional_edges, solution_edges, tabu_list_size=diff, tabu_time=1, max_iterations=100)
+        next_edge = Local_search_edges(optional_edges, solution_edges, tabu_list_size=diff, tabu_time=tabu_time, max_iterations=100)
 
         # Update the path solution
         solution_path.append(next_edge.nodes[1])

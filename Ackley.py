@@ -107,9 +107,7 @@ class AckleyFunction:
         # print("----- Simulated Anealing -----")
         simulated_annealing_instance = SimulatedAnnealing.SimulatedAnnealing()
         self.solution, self.score = simulated_annealing_instance.solve_ackley(self)
-        # print("solution: ", self.solution)
-        # print("TOTAL SCORE: ", self.score)
-        # print("TOTAL time: ", time.time() - curr_time)
+        self.solution, self.score = simulated_annealing_instance.solve_ackley(self)
         self.results_table[SIMULATED_ANNEALING][0] = SIMULATED_ANNEALING
         self.results_table[SIMULATED_ANNEALING][1] = round(time.time() - curr_time, 2)
         self.results_table[SIMULATED_ANNEALING][2] = round(self.score, 2)

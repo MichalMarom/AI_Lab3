@@ -212,7 +212,8 @@ class CVRP:
         # ------ balance with: Dist + weight, with circles ------
         dist = [math.dist(cluster.center.coordinates, self.clusters[i].center.coordinates) for i in range(len(self.clusters))]
         weight = [self.clusters[i].sum_demands for i in range(len(self.clusters))]
-        clusters_score = [0.5*dist[i] + 0.5*weight[i] for i in range(len(self.clusters))]
+        clusters_score = [1*dist[i] + 0*weight[i] for i in range(len(self.clusters))]
+        clusters_score[cluster_index] = float('inf')
         min_centers = []
         for i in range(len(clusters_score)):
             if clusters_score[i] == min(clusters_score) and i != cluster_index:

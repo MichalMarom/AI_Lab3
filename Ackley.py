@@ -1,4 +1,5 @@
 # ----------- File Form Lab -----------
+import time
 import Population
 import SimulatedAnnealing
 import TabuSearch
@@ -66,37 +67,47 @@ class AckleyFunction:
             self.solve_with_Cooperative_PSO()
 
     def solve_with_tabu_search(self):
+        curr_time = time.time()
         print("----- Tabu Search -----")
         self.solution, self.score = TabuSearch.tabu_search_ackley(self)
-        print("solution: ", self.solution.coordinates)
+        # print("solution: ", self.solution.coordinates)
         print("TOTAL SCORE: ", self.score)
+        print("TOTAL time: ", time.time() - curr_time)
         return
 
     def solve_with_aco(self):
+        curr_time = time.time()
         print("----- ACO -----")
         self.solution, self.score = aco.aco_algo_ackley(self)
-        print("solution: ", self.solution)
+        # print("solution: ", self.solution)
         print("TOTAL SCORE: ", self.score)
+        print("TOTAL time: ", time.time() - curr_time)
         return
 
     def solve_with_simulated_anealing(self):
+        curr_time = time.time()
         print("----- Simulated Anealing -----")
         simulated_annealing_instance = SimulatedAnnealing.SimulatedAnnealing()
         self.solution, self.score = simulated_annealing_instance.solve_ackley(self)
-        print("solution: ", self.solution)
+        # print("solution: ", self.solution)
         print("TOTAL SCORE: ", self.score)
+        print("TOTAL time: ", time.time() - curr_time)
         return
 
-    def solve_with_Cooperative_PSO(self):
+    def solve_with_Cooperative_PSO(self):        
+        curr_time = time.time()
         print("----- PSO -----")
         self.solution, self.total_score = CooperativePSO.cooperative_pso_ackley(self)
-        print("solution: ", self.solution)
-        print("TOTAL SCORE: ", self.total_score)
+        # print("solution: ", self.solution)
+        print("TOTAL SCORE: ", self.total_score)        
+        print("TOTAL time: ", time.time() - curr_time)
         return
 
     def solve_with_islands_genetic_algo(self):
+        curr_time = time.time()
         print("----- Islands Genetic Algorithem -----")
         self.solution, self.score = Population.solve_ackley(self)
-        print("solution: ", self.solution)
+        # print("solution: ", self.solution)
         print("TOTAL SCORE: ", self.score)
+        print("TOTAL time: ", time.time() - curr_time)
         return

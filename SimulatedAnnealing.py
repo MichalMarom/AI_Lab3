@@ -1,6 +1,8 @@
 # ----------- Python Package -----------
 import math
 import random
+
+from matplotlib import pyplot as plt
 from Ackley import AckleyFunction
 
 from Clustering import Cluster
@@ -145,6 +147,9 @@ class SimulatedAnnealing:
 
         # Initialize the temperature
         temperature = self.temperature
+                
+        scores = []
+        scores.append(current_fitness)
 
         # Simulated Annealing main loop
         while temperature > self.final_temperature:
@@ -167,7 +172,9 @@ class SimulatedAnnealing:
 
             # Cool down the temperature
             temperature *= self.cooling_rate
+            scores.append(current_fitness)
 
+        self.print_scores_grah(scores)
         return best_solution, best_fitness
 
         
@@ -179,3 +186,19 @@ class SimulatedAnnealing:
             return 1.0
         else:
             return math.exp((current_fitness - new_fitness) / temperature)
+
+    def print_scores_grah(self, scores: list):
+        max_value_x = len(scores)
+        max_value_y = max(scores) + 10
+        min_value_x = 0
+        min_value_y = 0
+        ax = plt.axes()
+        plt.suptitle("simulated annealing scores")
+        ax.set(xlim=(min_value_x, max_value_x),
+               ylim=(min_value_y, max_value_y),
+               xlabel='iterations',
+               ylabel='score')
+        iterations = [index for index in range(len(scores))]
+        plt.plot(iterations, scores)        
+        plt.show()
+        return

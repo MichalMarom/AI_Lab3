@@ -196,6 +196,7 @@ def solve_ackley(ackley):
     for individual in population:
         fitnesses.append(individual.score)
 
+    scores = []
 
     #starting GA
     for generation_index in range(max_generations):
@@ -203,7 +204,6 @@ def solve_ackley(ackley):
             fitnesses[index] = ackley.function(individual)
 
         average_fitness = np.average(fitnesses)
-
         # gen_time = time.time()
         # print(f"========================================= {generation_index}")
         # print(f"Average for this gen is {average_fitness}")
@@ -211,7 +211,7 @@ def solve_ackley(ackley):
         # Select the best individuals for reproduction
         elite_size = int(pop_size * ELITE_PERCENTAGE)
         elites = sorted(population, key=lambda individual: individual.score, reverse = True)[:elite_size] 
-
+        scores.append(np.average(fitnesses))
         # Generate new individuals by applying crossover and mutation operators
         offspring = []
         while len(offspring) < pop_size - elite_size:            
@@ -222,7 +222,6 @@ def solve_ackley(ackley):
 
             rand_a = random.randint(0, dimensions)
             child_gen = [parent1.coordinates[i] if i < rand_a else parent2.coordinates[i] for i in range(dimensions)]
-            # child_gen = self.cx_shuffle(parent1, parent2, self.gen_len)
             child = Individual.Individual(child_gen)
 
             child.gen_len = len(child_gen)
@@ -231,10 +230,11 @@ def solve_ackley(ackley):
             
         # mutation
         mutation_indexes = random.sample(range(len(offspring)), k= MUTATION_INDIVIDUALS)
-        for i, index in enumerate(mutation_indexes):
-            rand = random.randint(0, dimensions-1)
-            offspring[index].coordinates[rand] *= random.random()
-
+        for i, index in enumerate(mutation_indexes):         
+            # print(f"befor coord {offspring[index].coordinates}")  
+            for i, dim in enumerate(offspring[index].coordinates): 
+                offspring[index].coordinates[i] *= random.random()
+            # print(f"after coord {offspring[index].coordinates}")  
         population = elites + offspring
 
     # Find the individual with the highest fitness
@@ -246,5 +246,22 @@ def solve_ackley(ackley):
             best_individual = individual
 
     best_fitness = best_individual.score
-        
+    print_scores_grah(scores)   
     return best_individual.coordinates , best_fitness
+
+def print_scores_grah(scores: list):
+    # print(f"the scores are: {scores}")
+    max_value_x = len(scores)
+    max_value_y = max(scores) + 2
+    min_value_x = 0
+    min_value_y = min(scores) - 2
+    ax = plt.axes()
+    plt.suptitle("genetic alorithem scores")
+    ax.set(xlim=(min_value_x, max_value_x),
+            ylim=(min_value_y, max_value_y),
+            xlabel='iterations',
+            ylabel='score')
+    iterations = [index for index in range(len(scores))]
+    plt.plot(iterations, scores)        
+    plt.show()
+    return

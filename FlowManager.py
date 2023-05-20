@@ -43,12 +43,12 @@ class FlowManager:
     def run_multi_thread_CVRP_solution(self):
         # Create and start threads for each algorithm
         threads = []
-        # creat cluster of nodes for each track
+        # Create cluster of nodes for each track
         self.cvrp.create_clusters()
         for i in range(5):
-            thread = threading.Thread(target=self.solve_CVRP(i))
+            thread = threading.Thread(target = self.solve_CVRP(i))
             threads.append(thread)
-            thread = threading.Thread(target=self.print_graph(i))
+            thread = threading.Thread(target = self.print_graph(i))
             threads.append(thread)
 
         for thread in threads:
@@ -73,9 +73,9 @@ class FlowManager:
         # Create and start threads for each algorithm
         threads = []
         for i in range(5):
-            if i != 3:
-                thread = threading.Thread(target=self.find_minimum_ackley(i))
-                threads.append(thread)
+            thread = threading.Thread(target = self.find_minimum_ackley,
+                                      args = [i])
+            threads.append(thread)
 
         for thread in threads:
             thread.start()
@@ -84,9 +84,14 @@ class FlowManager:
         for thread in threads:
             thread.join()
 
+        # not multi threads run 
+        # for i in range(5):
+        #     self.find_minimum_ackley(i)
+
+        # print(f"the solutions matrix:\n{self.ackley.results_table}")
+        self.ackley.print_algorithm_comparison()
         return
 
-    def find_minimum_ackley(self, algorithm_type):
-        #ackley_function = Ackley.AckleyFunction()
+    def find_minimum_ackley(self, algorithm_type = None):
         self.ackley.find_minimum(algorithm_type)
         return

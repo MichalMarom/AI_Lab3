@@ -6,11 +6,13 @@ class Individual:
     demand: float
     index: int
     gen_len: int
+    score: float
 
     def __init__(self, cord: list, demand: float = 0, index: int = 0):
         self.coordinates = cord
         self.demand = demand
         self.index = int(index)
+        self.score = 0
 
     def distance_func(self, other_ind):
         return math.dist(self.coordinates, other_ind.coordinates)

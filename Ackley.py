@@ -67,7 +67,7 @@ class AckleyFunction:
             self.solve_with_islands_genetic_algo()
 
         elif algorithm_type == COOPERATIVE_PSO:
-            self.solve_with_COOPERATIVE_PSO()
+            self.solve_with_Cooperative_PSO()
 
     def solve_with_tabu_search(self):
         curr_time = time.time()
@@ -119,7 +119,7 @@ class AckleyFunction:
         # print(f"the solutions matrix:\n{self.results_table}")
         return
 
-    def solve_with_COOPERATIVE_PSO(self):        
+    def solve_with_Cooperative_PSO(self):        
         curr_time = time.time()
         # print("----- PSO -----")
         self.solution, self.total_score = CooperativePSO.cooperative_pso_ackley(self)

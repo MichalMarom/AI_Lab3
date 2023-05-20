@@ -1,4 +1,5 @@
 # ----------- File Form Lab -----------
+import Population
 import SimulatedAnnealing
 import TabuSearch
 import aco
@@ -80,17 +81,6 @@ class AckleyFunction:
 
     def solve_with_simulated_anealing(self):
         print("----- Simulated Anealing -----")
-        # for cluster in self.clusters:
-        #     simulated_annealing_instance = SimulatedAnnealing.SimulatedAnnealing(cluster,
-        #                                                                          self.start_point,
-        #                                                                          self.end_point)
-        #     simulated_annealing_instance.simulated_annealing()
-        #     solution, score = simulated_annealing_instance.get_solution_and_socre()
-        #     self.solution.append(solution)
-        #     self.total_score += score
-
-        # print("TOTAL SCORE: ", int(self.total_score))
-
         simulated_annealing_instance = SimulatedAnnealing.SimulatedAnnealing()
         self.solution, self.score = simulated_annealing_instance.solve_ackley(self)
         print("solution: ", self.solution)
@@ -105,40 +95,8 @@ class AckleyFunction:
         return
 
     def solve_with_islands_genetic_algo(self):
-        self.total_score = 0
-        self.solution = []
-
-        # Initialize the cvrp for the current island
-        for i, cluster in enumerate(self.clusters):
-            self.islands.append(Population.Population(cluster, self.start_point, self.end_point))
-
-        # Create and start threads for each island
-        threads = []
-        for i, island in enumerate(self.islands):
-            thread = threading.Thread(target=self.islands[i].genetic_algorithm,
-                                      args=())
-            threads.append(thread)
-
-        for thread in threads:
-            thread.start()
-
-        # Wait for all threads to finish
-        for thread in threads:
-            thread.join()
-
-        for i, island in enumerate(self.islands):
-            self.solution.append(self.islands[i].get_solution())
-            self.total_score += island.best_fitness
-
-        # for path in self.solution:
-        #     print("----------------")
-        #     for point in path:
-        #         print(point.index)
-
-        print("----- Islands Genetic -----")
-        print("TOTAL SCORE: ", int(self.total_score))
-
+        print("----- Islands Genetic Algorithem -----")
+        self.solution, self.score = Population.solve_ackley(self)
+        print("solution: ", self.solution)
+        print("TOTAL SCORE: ", self.score)
         return
-
-
-

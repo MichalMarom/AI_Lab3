@@ -73,9 +73,9 @@ class FlowManager:
         # Create and start threads for each algorithm
         threads = []
         for i in range(5):
-            if i != 3:
-                thread = threading.Thread(target=self.find_minimum_ackley(i))
-                threads.append(thread)
+            # if i != 3:
+            thread = threading.Thread(target=self.find_minimum_ackley(i))
+            threads.append(thread)
 
         for thread in threads:
             thread.start()
@@ -86,7 +86,7 @@ class FlowManager:
 
         return
 
-    def find_minimum_ackley(self, algorithm_type):
+    def find_minimum_ackley(self, algorithm_type = None):
         #ackley_function = Ackley.AckleyFunction()
         self.ackley.find_minimum(algorithm_type)
         return

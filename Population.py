@@ -3,6 +3,7 @@ from Clustering import Cluster
 import Data
 import NQueensIndividual
 import Individual
+# from Ackley import AckleyFunction
 # ----------- Python Package -----------
 import time
 import numpy as np
@@ -172,3 +173,95 @@ class Population:
         # [print(f"sol-> {ind.index}->") for ind in child_gen]
 
         return child_gen
+    
+
+# ----------------------- Not a class method --------------------
+def solve_ackley(ackley):
+    # score: float = 0
+    pop_size: int = 100
+    dimensions: int = ackley.dimensions
+    max_generations: int = 100
+
+    population: list = []
+    fitnesses: list = []
+
+    # create population
+    for index in range(pop_size):
+        first_node_coordinates = [random.uniform(ackley.bounds[0], ackley.bounds[1]) for i in range(dimensions)]
+        individual = Individual.Individual(first_node_coordinates)
+        individual.score = ackley.function(individual)
+        population.append(individual)
+
+    #create fitnesses
+    for individual in population:
+        fitnesses.append(individual.score)
+
+    scores = []
+
+    #starting GA
+    for generation_index in range(max_generations):
+        for index, individual in enumerate(population):
+            fitnesses[index] = ackley.function(individual)
+
+        average_fitness = np.average(fitnesses)
+        # gen_time = time.time()
+        # print(f"========================================= {generation_index}")
+        # print(f"Average for this gen is {average_fitness}")
+
+        # Select the best individuals for reproduction
+        elite_size = int(pop_size * ELITE_PERCENTAGE)
+        elites = sorted(population, key=lambda individual: individual.score, reverse = True)[:elite_size] 
+        scores.append(np.average(fitnesses))
+        # Generate new individuals by applying crossover and mutation operators
+        offspring = []
+        while len(offspring) < pop_size - elite_size:            
+            parent1 = random.choice(elites)
+            parent2 = random.choice(elites)
+
+            child_gen = []
+
+            rand_a = random.randint(0, dimensions)
+            child_gen = [parent1.coordinates[i] if i < rand_a else parent2.coordinates[i] for i in range(dimensions)]
+            child = Individual.Individual(child_gen)
+
+            child.gen_len = len(child_gen)
+            child.score = ackley.function(individual)           
+            offspring.append(child)
+            
+        # mutation
+        mutation_indexes = random.sample(range(len(offspring)), k= MUTATION_INDIVIDUALS)
+        for i, index in enumerate(mutation_indexes):         
+            # print(f"befor coord {offspring[index].coordinates}")  
+            for i, dim in enumerate(offspring[index].coordinates): 
+                offspring[index].coordinates[i] *= random.random()
+            # print(f"after coord {offspring[index].coordinates}")  
+        population = elites + offspring
+
+    # Find the individual with the highest fitness
+    best_individual = population[0]
+    
+    for individual in population:
+        individual.score = ackley.function(individual) 
+        if best_individual.score < individual.score:
+            best_individual = individual
+
+    best_fitness = best_individual.score
+    print_scores_grah(scores)   
+    return best_individual.coordinates , best_fitness
+
+def print_scores_grah(scores: list):
+    # print(f"the scores are: {scores}")
+    max_value_x = len(scores)
+    max_value_y = max(scores) + 2
+    min_value_x = 0
+    min_value_y = min(scores) - 2
+    ax = plt.axes()
+    plt.suptitle("genetic alorithem scores")
+    ax.set(xlim=(min_value_x, max_value_x),
+            ylim=(min_value_y, max_value_y),
+            xlabel='iterations',
+            ylabel='score')
+    iterations = [index for index in range(len(scores))]
+    plt.plot(iterations, scores)        
+    plt.show()
+    return

@@ -1,4 +1,6 @@
 # ----------- File Form Lab -----------
+import time
+import Population
 import SimulatedAnnealing
 import TabuSearch
 import aco
@@ -65,80 +67,47 @@ class AckleyFunction:
             self.solve_with_Cooperative_PSO()
 
     def solve_with_tabu_search(self):
+        curr_time = time.time()
         print("----- Tabu Search -----")
         self.solution, self.score = TabuSearch.tabu_search_ackley(self)
-        print("solution: ", self.solution.coordinates)
+        # print("solution: ", self.solution.coordinates)
         print("TOTAL SCORE: ", self.score)
+        print("TOTAL time: ", time.time() - curr_time)
         return
 
     def solve_with_aco(self):
+        curr_time = time.time()
         print("----- ACO -----")
         self.solution, self.score = aco.aco_algo_ackley(self)
-        print("solution: ", self.solution)
+        # print("solution: ", self.solution)
         print("TOTAL SCORE: ", self.score)
+        print("TOTAL time: ", time.time() - curr_time)
         return
 
     def solve_with_simulated_anealing(self):
+        curr_time = time.time()
         print("----- Simulated Anealing -----")
-        # for cluster in self.clusters:
-        #     simulated_annealing_instance = SimulatedAnnealing.SimulatedAnnealing(cluster,
-        #                                                                          self.start_point,
-        #                                                                          self.end_point)
-        #     simulated_annealing_instance.simulated_annealing()
-        #     solution, score = simulated_annealing_instance.get_solution_and_socre()
-        #     self.solution.append(solution)
-        #     self.total_score += score
-
-        # print("TOTAL SCORE: ", int(self.total_score))
-
         simulated_annealing_instance = SimulatedAnnealing.SimulatedAnnealing()
         self.solution, self.score = simulated_annealing_instance.solve_ackley(self)
-        print("solution: ", self.solution)
+        # print("solution: ", self.solution)
         print("TOTAL SCORE: ", self.score)
+        print("TOTAL time: ", time.time() - curr_time)
         return
 
-    def solve_with_Cooperative_PSO(self):
+    def solve_with_Cooperative_PSO(self):        
+        curr_time = time.time()
         print("----- PSO -----")
         self.solution, self.total_score = CooperativePSO.cooperative_pso_ackley(self)
-        print("solution: ", self.solution)
-        print("TOTAL SCORE: ", self.total_score)
+        # print("solution: ", self.solution)
+        print("TOTAL SCORE: ", self.total_score)        
+        print("TOTAL time: ", time.time() - curr_time)
         return
 
     def solve_with_islands_genetic_algo(self):
-        self.total_score = 0
-        self.solution = []
-
-        # Initialize the cvrp for the current island
-        for i, cluster in enumerate(self.clusters):
-            self.islands.append(Population.Population(cluster, self.start_point, self.end_point))
-
-        # Create and start threads for each island
-        threads = []
-        for i, island in enumerate(self.islands):
-            thread = threading.Thread(target=self.islands[i].genetic_algorithm,
-                                      args=())
-            threads.append(thread)
-
-        for thread in threads:
-            thread.start()
-
-        # Wait for all threads to finish
-        for thread in threads:
-            thread.join()
-
-        for i, island in enumerate(self.islands):
-            self.solution.append(self.islands[i].get_solution())
-            self.total_score += island.best_fitness
-
-        # for path in self.solution:
-        #     print("----------------")
-        #     for point in path:
-        #         print(point.index)
-
-        print("----- Islands Genetic -----")
-        print("TOTAL SCORE: ", int(self.total_score))
-
+        curr_time = time.time()
+        print("----- Islands Genetic Algorithem -----")
+        self.solution, self.score = Population.solve_ackley(self)
+        # print("solution: ", self.solution)
+        print("TOTAL SCORE: ", self.score)
+        print("TOTAL time: ", time.time() - curr_time)
         return
-
-
-

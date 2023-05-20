@@ -246,7 +246,7 @@ def solve_ackley(ackley):
             best_individual = individual
 
     best_fitness = best_individual.score
-    print_scores_grah(scores)   
+    # print_scores_grah(scores)   
     return best_individual.coordinates , best_fitness
 
 def print_scores_grah(scores: list):

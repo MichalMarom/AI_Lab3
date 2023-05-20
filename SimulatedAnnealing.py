@@ -174,7 +174,7 @@ class SimulatedAnnealing:
             temperature *= self.cooling_rate
             scores.append(current_fitness)
 
-        self.print_scores_grah(scores)
+        # self.print_scores_grah(scores)
         return best_solution, best_fitness
 
         

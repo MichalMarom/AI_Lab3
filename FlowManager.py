@@ -73,7 +73,8 @@ class FlowManager:
         # Create and start threads for each algorithm
         threads = []
         for i in range(5):
-            thread = threading.Thread(target=self.find_minimum_ackley(i))
+            thread = threading.Thread(target = self.find_minimum_ackley,
+                                      args = [i])
             threads.append(thread)
 
         for thread in threads:
@@ -83,9 +84,14 @@ class FlowManager:
         for thread in threads:
             thread.join()
 
+        # not multi threads run 
+        # for i in range(5):
+        #     self.find_minimum_ackley(i)
+
+        # print(f"the solutions matrix:\n{self.ackley.results_table}")
+        self.ackley.print_algorithm_comparison()
         return
 
     def find_minimum_ackley(self, algorithm_type = None):
-        #ackley_function = Ackley.AckleyFunction()
         self.ackley.find_minimum(algorithm_type)
         return

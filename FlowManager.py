@@ -46,9 +46,9 @@ class FlowManager:
         # Create cluster of nodes for each track
         self.cvrp.create_clusters()
         for i in range(5):
-            thread = threading.Thread(target=self.solve_CVRP(i))
+            thread = threading.Thread(target = self.solve_CVRP(i))
             threads.append(thread)
-            thread = threading.Thread(target=self.print_graph(i))
+            thread = threading.Thread(target = self.print_graph(i))
             threads.append(thread)
 
         for thread in threads:

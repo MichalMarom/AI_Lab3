@@ -69,6 +69,7 @@ class Population:
         return
     
     def genetic_algorithm(self):
+        scores = []
         for generation_index in range(self.data.max_generations):
             mutation_individuals = MUTATION_INDIVIDUALS
 
@@ -85,6 +86,7 @@ class Population:
             # Select the best individuals for reproduction
             elite_size = int(self.data.pop_size * ELITE_PERCENTAGE)
             elites = sorted(self.population, key=lambda NQueenInd: NQueenInd.score, reverse=True)[:elite_size] 
+            scores.append(np.average(self.fitnesses))
 
             # Generate new individuals by applying crossover and mutation operators
             offspring = []
@@ -126,6 +128,8 @@ class Population:
                 self.best_individual = individual
 
         self.best_fitness = abs(self.best_individual.score)
+        print_scores_grah(scores)   
+
         return
     
     def get_solution(self):

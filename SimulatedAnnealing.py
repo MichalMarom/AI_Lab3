@@ -82,7 +82,10 @@ class SimulatedAnnealing:
 
         best_tour = tour[:]
         best_cost = current_cost
-        
+
+        scores = []
+        scores.append(best_cost)
+
         # Repeat until the temperature reaches a minimum value or a stopping criterion is met
         while self.temperature > 0.1:
             # Generate a new candidate tour by making a small random change to the current tour
@@ -110,6 +113,8 @@ class SimulatedAnnealing:
             
             # Decrease the temperature according to the cooling schedule
             self.temperature *= self.cooling_rate
+            scores.append(best_cost)
+
         
         # Print the  TSP results
         # print("Best tour:", best_tour)
@@ -119,7 +124,7 @@ class SimulatedAnnealing:
         self.score = best_cost
         
         self.set_path_from_indexes()
-
+        self.print_scores_grah(scores)
         # print("solution creatd")
         return 
 

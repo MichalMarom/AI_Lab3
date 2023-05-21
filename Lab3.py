@@ -8,7 +8,7 @@ import FlowManager
 
 def main():
     flow_manager = FlowManager.FlowManager()
-    flow_manager.return_solutions()
+    flow_manager.run()
 
 if __name__ == "__main__":
     main()

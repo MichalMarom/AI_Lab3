@@ -71,11 +71,11 @@ class AckleyFunction:
 
     def solve_with_tabu_search(self):
         curr_time = time.time()
-        # print("----- Tabu Search -----")
+        print("----- Tabu Search -----")
         self.solution, self.score = TabuSearch.tabu_search_ackley(self)
-        # print("solution: ", self.solution.coordinates)
-        # print("TOTAL SCORE: ", self.score)
-        # print("TOTAL time: ", time.time() - curr_time)
+        print("solution: ", self.solution.coordinates)
+        print("TOTAL SCORE: ", self.score)
+        print("TOTAL time: ", time.time() - curr_time)
         self.results_table[TABU_SEARCH][0] = TABU_SEARCH
         self.results_table[TABU_SEARCH][1] = round(time.time() - curr_time, 2)
         self.results_table[TABU_SEARCH][2] = round(self.score, 2)
@@ -88,11 +88,11 @@ class AckleyFunction:
 
     def solve_with_aco(self):
         curr_time = time.time()
-        # print("----- ACO -----")
+        print("----- ACO -----")
         self.solution, self.score = aco.aco_algo_ackley(self)
-        # print("solution: ", self.solution)
-        # print("TOTAL SCORE: ", self.score)
-        # print("TOTAL time: ", time.time() - curr_time)
+        print("solution: ", self.solution)
+        print("TOTAL SCORE: ", self.score)
+        print("TOTAL time: ", time.time() - curr_time)
         self.results_table[ACO][0] = ACO
         self.results_table[ACO][1] = round(time.time() - curr_time, 2)
         self.results_table[ACO][2] = round(self.score, 2)
@@ -104,10 +104,12 @@ class AckleyFunction:
 
     def solve_with_simulated_anealing(self):
         curr_time = time.time()
-        # print("----- Simulated Anealing -----")
+        print("----- Simulated Anealing -----")
         simulated_annealing_instance = SimulatedAnnealing.SimulatedAnnealing()
         self.solution, self.score = simulated_annealing_instance.solve_ackley(self)
-        self.solution, self.score = simulated_annealing_instance.solve_ackley(self)
+        print("solution: ", self.solution)
+        print("TOTAL SCORE: ", self.score)        
+        print("TOTAL time: ", time.time() - curr_time)
         self.results_table[SIMULATED_ANNEALING][0] = SIMULATED_ANNEALING
         self.results_table[SIMULATED_ANNEALING][1] = round(time.time() - curr_time, 2)
         self.results_table[SIMULATED_ANNEALING][2] = round(self.score, 2)
@@ -119,11 +121,11 @@ class AckleyFunction:
 
     def solve_with_Cooperative_PSO(self):        
         curr_time = time.time()
-        # print("----- PSO -----")
-        self.solution, self.total_score = CooperativePSO.cooperative_pso_ackley(self)
-        # print("solution: ", self.solution)
-        # print("TOTAL SCORE: ", self.total_score)        
-        # print("TOTAL time: ", time.time() - curr_time)
+        print("----- PSO -----")
+        self.solution, self.score = CooperativePSO.cooperative_pso_ackley(self)
+        print("solution: ", self.solution)
+        print("TOTAL SCORE: ", self.score)        
+        print("TOTAL time: ", time.time() - curr_time)
         self.results_table[COOPERATIVE_PSO][0] = COOPERATIVE_PSO
         self.results_table[COOPERATIVE_PSO][1] = round(time.time() - curr_time, 2)
         self.results_table[COOPERATIVE_PSO][2] = round(self.score, 2)
@@ -134,11 +136,11 @@ class AckleyFunction:
 
     def solve_with_islands_genetic_algo(self):
         curr_time = time.time()
-        # print("----- Islands Genetic Algorithem -----")
+        print("----- Islands Genetic Algorithem -----")
         self.solution, self.score = Population.solve_ackley(self)
-        # print("solution: ", self.solution)
-        # print("TOTAL SCORE: ", self.score)
-        # print("TOTAL time: ", time.time() - curr_time)
+        print("solution: ", self.solution)
+        print("TOTAL SCORE: ", self.score)
+        print("TOTAL time: ", time.time() - curr_time)
         self.results_table[ISLANDS][0] = ISLANDS
         self.results_table[ISLANDS][1] = round(time.time() - curr_time, 2)
         self.results_table[ISLANDS][2] = round(self.score, 2)

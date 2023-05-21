@@ -33,11 +33,20 @@ class FlowManager:
         self.cvrp.print_clusters()
         return
 
-    def return_solutions(self):
-        if self.problem == CVRP_problem:
-            return self.run_multi_thread_CVRP_solution()
-        elif self.problem == ACKLEY_problem:
-            return self.run_multi_thread_Ackley_solution()
+    def run(self):
+        keep_running = 1 #true
+        while keep_running:
+            if self.problem == CVRP_problem:
+                self.run_multi_thread_CVRP_solution()
+            
+            if self.problem == ACKLEY_problem:
+                self.run_multi_thread_Ackley_solution()
+        
+            keep_running = int(input("Do you want to keep running?\n No = 0\n Yes= 1\n"))
+            if keep_running:
+                self.problem = int(input("Enter the problem type:\n CVRP = 0\n Ackley= 1\n"))
+        return
+
 
     # ----- CVRP -----
     def run_multi_thread_CVRP_solution(self):
@@ -57,6 +66,7 @@ class FlowManager:
         # Wait for all threads to finish
         for thread in threads:
             thread.join()
+
 
         return
 

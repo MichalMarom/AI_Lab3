@@ -258,7 +258,7 @@ class CVRP:
         print("----- Tabu Search -----")
         print("TOTAL SCORE: ", self.total_score)
         self.total_time = time.time() - start_time
-        self.show_scores(scores, "Tabu Search scores")
+        # self.show_scores(scores, "Tabu Search scores")
         return
 
     def solve_with_aco(self):
@@ -267,7 +267,7 @@ class CVRP:
         print("----- ACO -----")
         print("TOTAL SCORE: ", self.total_score)
         self.total_time = time.time() - start_time
-        self.show_scores(scores, "ACO scores")
+        # self.show_scores(scores, "ACO scores")
         return
 
     def solve_with_simulated_anealing(self):
@@ -298,7 +298,7 @@ class CVRP:
         print("----- PSO -----")
         print("TOTAL SCORE: ", self.total_score)
         self.total_time = time.time() - start_time
-        self.show_scores(scores, "Cooperative PSO Scores")
+        # self.show_scores(scores, "Cooperative PSO Scores")
         return
     
     def solve_with_islands_genetic_algo(self):
